@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Sparkles } from "lucide-react";
 
-import { ContextEngine } from "../../core/context";
+import { ContextEngine } from "@/features/core/context";
 import { AssistantEngine } from "../assistant/AssistantEngine";
 
 import AssistantResponse from "./AssistantResponse";
@@ -70,9 +70,7 @@ export default function AiPrompt() {
 
     setResponse("✅ Dados guardados. A abrir o Construtor de Esquemas...");
 
-    setTimeout(() => {
-      router.push("/planner");
-    }, 800);
+    router.push("/planner");
   }
 
   return (

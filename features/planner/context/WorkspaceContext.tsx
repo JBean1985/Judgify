@@ -4,6 +4,7 @@ import {
   createContext,
   ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -55,7 +56,41 @@ interface WorkspaceProviderProps {
 export function WorkspaceProvider({
   children,
 }: WorkspaceProviderProps) {
-  const [elements, setElements] = useState<ProgramElement[]>([]);
+  const [elements, setElements] = useState<ProgramElement[]>(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.localStorage === "undefined"
+    ) {
+      return [];
+    }
+
+    const stored = window.localStorage.getItem(
+      "judgify-planner-elements"
+    );
+
+    if (!stored) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as ProgramElement[];
+
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      "judgify-planner-elements",
+      JSON.stringify(elements)
+    );
+  }, [elements]);
 
   function addElement(element: AddProgramElement) {
     const code = element.code ?? element.id.split("-")[0];

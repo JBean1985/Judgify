@@ -13,7 +13,7 @@ const actions = [
     title: "Criar Esquema",
     description: "Construir um Esquema de Patinagem.",
     icon: FileText,
-    href: "/planner",
+    href: "/?createPlanner=1",
   },
   {
     title: "Analisar Vídeo",
