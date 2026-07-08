@@ -8,20 +8,17 @@ import {
   useState,
 } from "react";
 
-export interface ProgramElement {
-  id: string;
-  code: string;
-  name: string;
-  type: string;
-  family: string;
-  category: string;
-  rotations?: number;
-  baseValue: number;
+// Import the canonical ProgramElement type from the shared `types/element.ts`.
+import type { ProgramElement as CanonicalProgramElement, ElementType } from "../../../types/element";
+
+// Re-export a planner-compatible `ProgramElement` that keeps runtime-required
+// fields non-optional so existing UI and logic remain type-safe without edits.
+export type ProgramElement = CanonicalProgramElement & {
   goeGrade: number;
   goeValue: number;
-  notes: string;
   status: "valid" | "warning" | "invalid";
-}
+  notes: string;
+};
 
 type AddProgramElement = {
   id: string;
@@ -66,10 +63,14 @@ export function WorkspaceProvider({
     setElements((current) => [
       ...current,
       {
-        ...element,
+        id: element.id,
         code,
+        name: element.name,
+        type: (element.type as ElementType) ?? ("spin" as ElementType),
         family: element.family ?? element.name,
-        category: element.category ?? element.type,
+        category: (element.category ?? element.type) as ElementType,
+        rotations: element.rotations,
+        baseValue: element.baseValue,
         goeGrade: element.goeGrade ?? 0,
         goeValue: element.goeValue ?? 0,
         notes: element.notes ?? "",

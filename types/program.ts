@@ -1,4 +1,4 @@
-import { ProgramElement } from "./element";
+import type { ProgramElement } from "./element";
 
 export type ProgramType = "short" | "free";
 
