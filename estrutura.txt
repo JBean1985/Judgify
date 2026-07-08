@@ -1,0 +1,109 @@
+features
+├── core
+│   └── context
+│       ├── ContextEngine.ts
+│       ├── index.ts
+│       └── types.ts
+├── dashboard
+│   ├── DashboardPage.tsx
+│   ├── components
+│   │   └── DashboardCard.tsx
+│   ├── dashboardData.ts
+│   └── index.ts
+├── home
+│   ├── ActionCard.tsx
+│   ├── HomePage.tsx
+│   ├── actions.ts
+│   ├── assistant
+│   │   ├── AssistantEngine.ts
+│   │   ├── IntentParser.ts
+│   │   ├── index.ts
+│   │   ├── intents.ts
+│   │   └── suggestions.ts
+│   ├── components
+│   │   ├── AiPrompt.tsx
+│   │   ├── AssistantResponse.tsx
+│   │   ├── HomeHero.tsx
+│   │   ├── QuickActions.tsx
+│   │   └── RecentActivity.tsx
+│   ├── index.ts
+│   └── pages
+│       └── WelcomeExperience.tsx
+├── planner
+│   ├── PlannerPage.tsx
+│   ├── components
+│   │   ├── AiPrompt.tsx
+│   │   ├── ElementList.tsx
+│   │   ├── ElementPicker.tsx
+│   │   ├── HomeHero.tsx
+│   │   ├── ProgramEditor.tsx
+│   │   ├── QuickActions.tsx
+│   │   ├── RecentActivity.tsx
+│   │   ├── ScorePanel.tsx
+│   │   ├── assistant
+│   │   │   ├── AssistantCategory.tsx
+│   │   │   ├── AssistantGoal.tsx
+│   │   │   ├── AssistantLevel.tsx
+│   │   │   ├── AssistantProgram.tsx
+│   │   │   ├── AssistantSummary.tsx
+│   │   │   ├── AssistantWelcome.tsx
+│   │   │   ├── CoachAssistant.tsx
+│   │   │   └── index.ts
+│   │   ├── common
+│   │   └── workspace
+│   │       ├── ElementList.tsx
+│   │       ├── ElementPicker.tsx
+│   │       ├── HomeHero.tsx
+│   │       ├── PlannerWorkspace.tsx
+│   │       ├── ScorePanel.tsx
+│   │       ├── TechnicalPanel.tsx
+│   │       ├── WorkspaceAssistant.tsx
+│   │       ├── WorkspaceHeader.tsx
+│   │       ├── WorkspaceLibrary.tsx
+│   │       ├── WorkspaceProgram.tsx
+│   │       ├── desktop
+│   │       │   └── WorkspaceLibraryDesktop.tsx
+│   │       ├── index.ts
+│   │       ├── mobile
+│   │       │   ├── FloatingActionButton.tsx
+│   │       │   └── WorkspaceLibraryMobile.tsx
+│   │       └── technical-sheet
+│   │           ├── TechnicalElementCard.tsx
+│   │           ├── TechnicalSheet.tsx
+│   │           └── index.ts
+│   ├── context
+│   │   ├── AssistantContext.tsx
+│   │   ├── PlannerContext.tsx
+│   │   ├── WorkspaceContext.tsx
+│   │   └── index.ts
+│   ├── data
+│   │   ├── elements.ts
+│   │   ├── index.ts
+│   │   ├── jumps.ts
+│   │   ├── sequences.ts
+│   │   └── spins.ts
+│   ├── hooks
+│   │   ├── index.ts
+│   │   ├── useAssistant.ts
+│   │   └── usePlanner.ts
+│   ├── index.ts
+│   ├── plannerData.ts
+│   ├── services
+│   │   └── plannerService.ts
+│   └── types
+│       ├── assistant.ts
+│       ├── elementPicker.ts
+│       ├── planner.ts
+│       └── program.ts
+└── workspace
+    ├── components
+    │   ├── ConversationPanel.tsx
+    │   ├── Workspace.tsx
+    │   ├── WorkspaceContent.tsx
+    │   └── WorkspaceSuggestions.tsx
+    ├── hooks
+    ├── pages
+    ├── services
+    └── types
+
+28 directories, 79 files
