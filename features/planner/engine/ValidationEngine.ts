@@ -1,4 +1,5 @@
-import { ProgramElement } from "../context";
+
+import type { ProgramElement } from "../../../types/element";
 import { ProgramRules } from "../rules/ProgramRules";
 
 export interface ValidationMessage {

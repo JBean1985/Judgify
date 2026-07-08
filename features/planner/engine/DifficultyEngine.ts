@@ -1,4 +1,4 @@
-import { ProgramElement } from "../context";
+import type { ProgramElement } from "../../../types/element";
 
 export interface DifficultyResult {
   totalBaseValue: number;
@@ -41,7 +41,7 @@ export class DifficultyEngine {
       elements.length === 0
         ? 0
         : elements.reduce(
-            (total, element) => total + element.goeGrade,
+            (total, element) => total + (element.goeGrade ?? 0),
             0
           ) / elements.length;
 

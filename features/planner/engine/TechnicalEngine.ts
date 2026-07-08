@@ -1,4 +1,4 @@
-import { ProgramElement } from "../context";
+import type { ProgramElement } from "../../../types/element";
 import { jumpGoeRules } from "../rules/goe/jumps";
 
 export interface TechnicalResult {
@@ -30,7 +30,7 @@ export class TechnicalEngine {
     );
 
     const goe = elements.reduce(
-      (total, element) => total + element.goeValue,
+      (total, element) => total + (element.goeValue as number),
       0
     );
 
