@@ -1,13 +1,4 @@
-export type ProgramTypeId =
-  | "short"
-  | "long";
-
-export interface ProgramType {
-  id: ProgramTypeId;
-  name: string;
-}
-
-export const programTypes: ProgramType[] = [
+export const programTypes = [
   {
     id: "short",
     name: "Programa Curto",
@@ -16,14 +7,19 @@ export const programTypes: ProgramType[] = [
     id: "long",
     name: "Programa Longo",
   },
-];
+] as const;
+
+export type ProgramType = (typeof programTypes)[number];
+export type ProgramTypeId = ProgramType["id"];
 
 export function findProgramTypeByName(
   name: string
 ): ProgramType | undefined {
+  const normalizedName = name.trim().toLowerCase();
+
   return programTypes.find(
     (programType) =>
-      programType.name.toLowerCase() ===
-      name.toLowerCase()
+      programType.id === normalizedName ||
+      programType.name.toLowerCase() === normalizedName
   );
 }

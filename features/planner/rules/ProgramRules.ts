@@ -1,6 +1,6 @@
-import { CategoryRules, categories } from "./categories";
-import { DisciplineId } from "./disciplines";
-import { ProgramTypeId } from "./programTypes";
+import { CategoryId, CategoryRules, findCategory } from "./categories";
+import type { DisciplineId } from "./disciplines";
+import type { ProgramTypeId } from "./programTypes";
 
 export interface ProgramRuleSet {
   category: CategoryRules;
@@ -10,18 +10,15 @@ export interface ProgramRuleSet {
 
 export class ProgramRules {
   static findCategory(categoryName: string): CategoryRules | undefined {
-    return categories.find(
-      (category) =>
-        category.name.toLowerCase() === categoryName.toLowerCase()
-    );
+    return findCategory(categoryName);
   }
 
   static getRules(params: {
-    categoryName: string;
+    category: CategoryId;
     discipline: DisciplineId;
     programType: ProgramTypeId;
   }): ProgramRuleSet | null {
-    const category = this.findCategory(params.categoryName);
+    const category = this.findCategory(params.category);
 
     if (!category) {
       return null;

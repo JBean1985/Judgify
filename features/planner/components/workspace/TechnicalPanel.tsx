@@ -24,9 +24,18 @@ export default function TechnicalPanel() {
   const validation = useMemo(() => {
     return ValidationEngine.validate(
       elements,
-      context.category
+      {
+        category: context.category,
+        discipline: context.discipline,
+        programType: context.programType,
+      }
     );
-  }, [elements, context.category]);
+  }, [
+    elements,
+    context.category,
+    context.discipline,
+    context.programType,
+  ]);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">

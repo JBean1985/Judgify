@@ -1,5 +1,8 @@
 
 import type { ProgramElement } from "../../../types/element";
+import { findCategory } from "../rules/categories";
+import { findDisciplineByName } from "../rules/disciplines";
+import { findProgramTypeByName } from "../rules/programTypes";
 import { ProgramRules } from "../rules/ProgramRules";
 
 export interface ValidationMessage {
@@ -12,24 +15,44 @@ export interface ValidationResult {
   messages: ValidationMessage[];
 }
 
+export interface ValidationContext {
+  category?: string;
+  discipline?: string;
+  programType?: string;
+}
+
 export class ValidationEngine {
   static validate(
     elements: ProgramElement[],
-    categoryName = "Juvenis"
+    context: ValidationContext = {}
   ): ValidationResult {
     const messages: ValidationMessage[] = [];
-
-    const rules = ProgramRules.getRules({
-      categoryName,
-      discipline: "free",
-      programType: "long",
-    });
+    const category = context.category
+      ? findCategory(context.category)
+      : undefined;
+    const discipline = context.discipline
+      ? findDisciplineByName(context.discipline)
+      : undefined;
+    const programType = context.programType
+      ? findProgramTypeByName(context.programType)
+      : undefined;
+    const rules = category && discipline && programType
+      ? ProgramRules.getRules({
+          category: category.id,
+          discipline: discipline.id,
+          programType: programType.id,
+        })
+      : null;
+    const categoryRules = rules?.category ?? category;
 
     messages.push(...this.validateRepeatedElements(elements));
-    messages.push(...this.validateMaximumElements(elements, rules?.category.maxElements ?? 10));
-    messages.push(...this.validateMaximumJumps(elements, rules?.category.maxJumps ?? 7));
-    messages.push(...this.validateMaximumSpins(elements, rules?.category.maxSpins ?? 3));
-    messages.push(...this.validateMaximumSequences(elements, rules?.category.maxSequences ?? 1));
+
+    if (categoryRules) {
+      messages.push(...this.validateMaximumElements(elements, categoryRules.maxElements));
+      messages.push(...this.validateMaximumJumps(elements, categoryRules.maxJumps));
+      messages.push(...this.validateMaximumSpins(elements, categoryRules.maxSpins));
+      messages.push(...this.validateMaximumSequences(elements, categoryRules.maxSequences));
+    }
 
     return {
       valid: !messages.some((message) => message.type === "error"),
