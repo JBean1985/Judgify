@@ -10,7 +10,7 @@ import {
 
 const actions = [
   {
-    title: "Criar Esquema",
+    title: "Criar novo esquema",
     description: "Construir um Esquema de Patinagem.",
     icon: FileText,
     href: "/?createPlanner=1",

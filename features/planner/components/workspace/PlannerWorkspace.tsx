@@ -8,6 +8,9 @@ import {
   type GlobalContext,
 } from "@/features/core/context";
 import { WorkspaceProvider } from "../../context";
+import { findCategory } from "../../rules/categories";
+import { findDisciplineByName } from "../../rules/disciplines";
+import { findProgramTypeByName } from "../../rules/programTypes";
 
 import WorkspaceHeader from "./WorkspaceHeader";
 import WorkspaceAssistant from "./WorkspaceAssistant";
@@ -42,12 +45,12 @@ export default function PlannerWorkspace() {
     return null;
   }
 
-  const hasSchemaContext =
-    context.athlete &&
-    context.category &&
-    context.discipline;
-
-  if (!hasSchemaContext) {
+  if (
+    !context.athlete ||
+    !context.category ||
+    !context.discipline ||
+    !context.programType
+  ) {
     return (
       <div className="space-y-6">
         <WorkspaceHeader title="Construtor de Esquemas" />
@@ -62,10 +65,10 @@ export default function PlannerWorkspace() {
           </p>
 
           <Link
-            href="/"
+            href="/?createPlanner=1"
             className="mt-6 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-white transition hover:bg-blue-700"
           >
-            Voltar ao início
+            Criar novo esquema
           </Link>
         </div>
       </div>
@@ -77,7 +80,7 @@ export default function PlannerWorkspace() {
       <div className="space-y-6">
         <WorkspaceHeader title="Construtor de Esquemas" />
 
-        <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3">
+        <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-sm text-slate-500">Atleta</p>
             <p className="mt-1 font-semibold text-slate-900">
@@ -86,16 +89,23 @@ export default function PlannerWorkspace() {
           </div>
 
           <div>
-            <p className="text-sm text-slate-500">Categoria</p>
+            <p className="text-sm text-slate-500">Escalão</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {context.category}
+              {findCategory(context.category)?.name ?? context.category}
             </p>
           </div>
 
           <div>
             <p className="text-sm text-slate-500">Disciplina</p>
             <p className="mt-1 font-semibold text-slate-900">
-              {context.discipline}
+              {findDisciplineByName(context.discipline)?.name ?? context.discipline}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-slate-500">Tipo de programa</p>
+            <p className="mt-1 font-semibold text-slate-900">
+              {findProgramTypeByName(context.programType)?.name ?? context.programType}
             </p>
           </div>
         </div>

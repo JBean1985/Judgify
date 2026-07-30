@@ -6,7 +6,7 @@ export function createProgram(
   return {
     id: crypto.randomUUID(),
 
-    name: data.name ?? "Novo Programa",
+    name: data.name ?? "Novo esquema",
 
     athleteId: data.athleteId,
 

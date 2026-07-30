@@ -11,6 +11,7 @@ import {
 
 // Import the canonical ProgramElement type from the shared `types/element.ts`.
 import type { ProgramElement as CanonicalProgramElement, ElementType } from "../../../types/element";
+import { PLANNER_ELEMENTS_STORAGE_KEY } from "@/shared/constants/storage";
 
 // Re-export a planner-compatible `ProgramElement` that keeps runtime-required
 // fields non-optional so existing UI and logic remain type-safe without edits.
@@ -64,9 +65,7 @@ export function WorkspaceProvider({
       return [];
     }
 
-    const stored = window.localStorage.getItem(
-      "judgify-planner-elements"
-    );
+    const stored = window.localStorage.getItem(PLANNER_ELEMENTS_STORAGE_KEY);
 
     if (!stored) {
       return [];
@@ -87,7 +86,7 @@ export function WorkspaceProvider({
     }
 
     window.localStorage.setItem(
-      "judgify-planner-elements",
+      PLANNER_ELEMENTS_STORAGE_KEY,
       JSON.stringify(elements)
     );
   }, [elements]);

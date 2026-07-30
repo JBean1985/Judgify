@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Sparkles } from "lucide-react";
 
 import { ContextEngine } from "@/features/core/context";
@@ -9,13 +9,37 @@ import { AssistantEngine } from "../assistant/AssistantEngine";
 
 import AssistantResponse from "./AssistantResponse";
 import SchemaWizard from "./SchemaWizard";
+import type { SchemaWizardData } from "./SchemaWizard";
+import {
+  GLOBAL_CONTEXT_STORAGE_KEY,
+  PLANNER_ELEMENTS_STORAGE_KEY,
+} from "@/shared/constants/storage";
+
+function destinationWithoutCreatePlanner(pathname?: string): string {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("createPlanner");
+
+  if (pathname) {
+    url.pathname = pathname;
+  }
+
+  return `${url.pathname}${url.search}${url.hash}`;
+}
 
 export default function AiPrompt() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const createPlannerRequested = searchParams.get("createPlanner") === "1";
 
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
-  const [showSchemaWizard, setShowSchemaWizard] = useState(false);
+  const [response, setResponse] = useState(() =>
+    createPlannerRequested
+      ? "📋 Excelente! Vamos criar um novo esquema. Preencha os dados abaixo para continuar."
+      : ""
+  );
+  const [showSchemaWizard, setShowSchemaWizard] = useState(
+    createPlannerRequested
+  );
 
   function handleSubmit() {
     if (!message.trim()) return;
@@ -56,21 +80,70 @@ export default function AiPrompt() {
     }
   }
 
-  function handleSchemaComplete(data: {
-    athlete: string;
-    category: string;
-    discipline: string;
-  }) {
-    ContextEngine.set({
-      athlete: data.athlete,
-      category: data.category,
-      discipline: data.discipline,
-      currentModule: "planner",
-    });
+  function handleSchemaComplete(data: SchemaWizardData) {
+    let previousStoredContext: string | null = null;
+    let previousStoredElements: string | null = null;
+    let snapshotsTaken = false;
+
+    try {
+      previousStoredContext = window.localStorage.getItem(
+        GLOBAL_CONTEXT_STORAGE_KEY
+      );
+      previousStoredElements = window.localStorage.getItem(
+        PLANNER_ELEMENTS_STORAGE_KEY
+      );
+      snapshotsTaken = true;
+
+      ContextEngine.set({
+        athlete: data.athlete,
+        category: data.category,
+        discipline: data.discipline,
+        programType: data.programType,
+        currentModule: "planner",
+      });
+
+      window.localStorage.removeItem(PLANNER_ELEMENTS_STORAGE_KEY);
+    } catch {
+      let rollbackSucceeded = !snapshotsTaken;
+
+      if (snapshotsTaken) {
+        try {
+          if (previousStoredContext === null) {
+            window.localStorage.removeItem(GLOBAL_CONTEXT_STORAGE_KEY);
+          } else {
+            window.localStorage.setItem(
+              GLOBAL_CONTEXT_STORAGE_KEY,
+              previousStoredContext
+            );
+          }
+
+          if (previousStoredElements === null) {
+            window.localStorage.removeItem(PLANNER_ELEMENTS_STORAGE_KEY);
+          } else {
+            window.localStorage.setItem(
+              PLANNER_ELEMENTS_STORAGE_KEY,
+              previousStoredElements
+            );
+          }
+
+          ContextEngine.restore();
+          rollbackSucceeded = true;
+        } catch {
+          rollbackSucceeded = false;
+        }
+      }
+
+      setResponse(
+        rollbackSucceeded
+          ? "Não foi possível guardar o novo esquema. O esquema anterior foi mantido. Tente novamente."
+          : "Não foi possível guardar o novo esquema nem confirmar a recuperação dos dados anteriores. Recarregue a página antes de continuar."
+      );
+      return;
+    }
 
     setResponse("✅ Dados guardados. A abrir o Construtor de Esquemas...");
 
-    router.push("/planner");
+    router.push(destinationWithoutCreatePlanner("/planner"));
   }
 
   return (
@@ -127,7 +200,14 @@ export default function AiPrompt() {
 
         {showSchemaWizard && (
           <div className="mt-6">
-            <SchemaWizard onComplete={handleSchemaComplete} />
+            <SchemaWizard
+              onComplete={handleSchemaComplete}
+              onCancel={() => {
+                setShowSchemaWizard(false);
+                setResponse("");
+                router.replace(destinationWithoutCreatePlanner());
+              }}
+            />
           </div>
         )}
       </div>
