@@ -10,10 +10,10 @@ import {
 
 const actions = [
   {
-    title: "Criar Programa",
+    title: "Criar novo esquema",
     description: "Construa uma Folha Técnica com o apoio da IA.",
     icon: FileText,
-    href: "/planner",
+    href: "/?createPlanner=1",
   },
   {
     title: "Analisar Vídeo",

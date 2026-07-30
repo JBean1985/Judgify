@@ -16,9 +16,9 @@ export interface HomeAction {
 export const actions: HomeAction[] = [
   {
     id: "planner",
-    title: "Novo Esquema",
+    title: "Novo esquema",
     description: "Criar ou editar um esquema de prova.",
-    href: "/planner",
+    href: "/?createPlanner=1",
     icon: FileText,
   },
   {

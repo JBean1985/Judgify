@@ -1,6 +1,7 @@
 "use client";
 
 import { Trophy } from "lucide-react";
+import Link from "next/link";
 
 import ActionCard from "./ActionCard";
 import { actions } from "./actions";
@@ -58,12 +59,13 @@ export default function HomePage() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Ainda não existem programas criados.
+                Ainda não existem esquemas criados.
               </p>
 
             </div>
 
-            <button
+            <Link
+              href="/?createPlanner=1"
               className="
                 rounded-xl
                 bg-blue-600
@@ -76,8 +78,8 @@ export default function HomePage() {
                 hover:bg-blue-700
               "
             >
-              Novo Esquema
-            </button>
+              Novo esquema
+            </Link>
 
           </div>
 

@@ -1,6 +1,8 @@
 import { GlobalContext } from "./types";
-
-const STORAGE_KEY = "judgify-global-context";
+import { GLOBAL_CONTEXT_STORAGE_KEY } from "@/shared/constants/storage";
+import { findCategory } from "@/features/planner/rules/categories";
+import { findDisciplineByName } from "@/features/planner/rules/disciplines";
+import { findProgramTypeByName } from "@/features/planner/rules/programTypes";
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -15,20 +17,29 @@ function parseStoredContext(value: string): GlobalContext | null {
       parsed === null ||
       !isNonEmptyString(Reflect.get(parsed, "athlete")) ||
       !isNonEmptyString(Reflect.get(parsed, "category")) ||
-      !isNonEmptyString(Reflect.get(parsed, "discipline"))
+      !isNonEmptyString(Reflect.get(parsed, "discipline")) ||
+      !isNonEmptyString(Reflect.get(parsed, "programType"))
     ) {
+      return null;
+    }
+
+    const category = findCategory(Reflect.get(parsed, "category"));
+    const discipline = findDisciplineByName(Reflect.get(parsed, "discipline"));
+    const programType = findProgramTypeByName(Reflect.get(parsed, "programType"));
+
+    if (!category || !discipline || !programType) {
       return null;
     }
 
     const context: GlobalContext = {
       athlete: Reflect.get(parsed, "athlete"),
-      category: Reflect.get(parsed, "category"),
-      discipline: Reflect.get(parsed, "discipline"),
+      category: category.id,
+      discipline: discipline.id,
+      programType: programType.id,
     };
 
     const competition = Reflect.get(parsed, "competition");
     const currentModule = Reflect.get(parsed, "currentModule");
-    const programType = Reflect.get(parsed, "programType");
 
     if (isNonEmptyString(competition)) {
       context.competition = competition;
@@ -36,10 +47,6 @@ function parseStoredContext(value: string): GlobalContext | null {
 
     if (isNonEmptyString(currentModule)) {
       context.currentModule = currentModule;
-    }
-
-    if (isNonEmptyString(programType)) {
-      context.programType = programType;
     }
 
     return context;
@@ -53,7 +60,7 @@ function writeStoredContext(context: GlobalContext): void {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(context));
+  window.localStorage.setItem(GLOBAL_CONTEXT_STORAGE_KEY, JSON.stringify(context));
 }
 
 function removeStoredContext(): void {
@@ -61,7 +68,7 @@ function removeStoredContext(): void {
     return;
   }
 
-  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(GLOBAL_CONTEXT_STORAGE_KEY);
 }
 
 export class ContextEngine {
@@ -72,12 +79,13 @@ export class ContextEngine {
   }
 
   static set(data: Partial<GlobalContext>): void {
-    this.context = {
+    const nextContext = {
       ...this.context,
       ...data,
     };
 
-    writeStoredContext(this.context);
+    writeStoredContext(nextContext);
+    this.context = nextContext;
   }
 
   static restore(): GlobalContext | null {
@@ -88,7 +96,7 @@ export class ContextEngine {
     let stored: string | null;
 
     try {
-      stored = window.localStorage.getItem(STORAGE_KEY);
+      stored = window.localStorage.getItem(GLOBAL_CONTEXT_STORAGE_KEY);
     } catch {
       this.context = {};
       return null;
