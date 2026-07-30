@@ -28,6 +28,7 @@ function parseStoredContext(value: string): GlobalContext | null {
 
     const competition = Reflect.get(parsed, "competition");
     const currentModule = Reflect.get(parsed, "currentModule");
+    const programType = Reflect.get(parsed, "programType");
 
     if (isNonEmptyString(competition)) {
       context.competition = competition;
@@ -35,6 +36,10 @@ function parseStoredContext(value: string): GlobalContext | null {
 
     if (isNonEmptyString(currentModule)) {
       context.currentModule = currentModule;
+    }
+
+    if (isNonEmptyString(programType)) {
+      context.programType = programType;
     }
 
     return context;

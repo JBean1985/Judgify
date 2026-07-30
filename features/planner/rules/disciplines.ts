@@ -1,15 +1,4 @@
-export type DisciplineId =
-  | "free"
-  | "solo-dance"
-  | "pairs"
-  | "precision";
-
-export interface Discipline {
-  id: DisciplineId;
-  name: string;
-}
-
-export const disciplines: Discipline[] = [
+export const disciplines = [
   {
     id: "free",
     name: "Livre",
@@ -26,13 +15,19 @@ export const disciplines: Discipline[] = [
     id: "precision",
     name: "Precisão",
   },
-];
+] as const;
+
+export type Discipline = (typeof disciplines)[number];
+export type DisciplineId = Discipline["id"];
 
 export function findDisciplineByName(
   name: string
 ): Discipline | undefined {
+  const normalizedName = name.trim().toLowerCase();
+
   return disciplines.find(
     (discipline) =>
-      discipline.name.toLowerCase() === name.toLowerCase()
+      discipline.id === normalizedName ||
+      discipline.name.toLowerCase() === normalizedName
   );
 }

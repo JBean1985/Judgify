@@ -1,22 +1,4 @@
-export interface CategoryRules {
-  id: string;
-
-  name: string;
-
-  maxElements: number;
-
-  maxJumps: number;
-
-  maxSpins: number;
-
-  maxSequences: number;
-
-  allowRepeatedJump: boolean;
-
-  programDuration: number;
-}
-
-export const categories: CategoryRules[] = [
+export const categories = [
   {
     id: "benjamins",
     name: "Benjamins",
@@ -82,4 +64,17 @@ export const categories: CategoryRules[] = [
     allowRepeatedJump: true,
     programDuration: 270,
   },
-];
+] as const;
+
+export type CategoryRules = (typeof categories)[number];
+export type CategoryId = CategoryRules["id"];
+
+export function findCategory(value: string): CategoryRules | undefined {
+  const normalizedValue = value.trim().toLowerCase();
+
+  return categories.find(
+    (category) =>
+      category.id === normalizedValue ||
+      category.name.toLowerCase() === normalizedValue
+  );
+}
