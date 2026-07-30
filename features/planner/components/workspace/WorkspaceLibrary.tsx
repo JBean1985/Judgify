@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -22,8 +22,36 @@ function getJumpFamily(jump: Jump) {
   return jump.family;
 }
 
+function Section({
+  title,
+  open,
+  toggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  toggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200">
+      <button
+        onClick={toggle}
+        className="flex w-full items-center justify-between p-4 font-medium transition hover:bg-slate-50"
+      >
+        <span>{title}</span>
+        {open ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+      </button>
+
+      {open && <div className="border-t border-slate-200">{children}</div>}
+    </div>
+  );
+}
+
 export default function WorkspaceLibrary() {
   const { addElement } = useWorkspace();
+  const elementIdPrefix = useId();
+  const nextElementId = useRef(0);
 
   const [showJumps, setShowJumps] = useState(true);
   const [showSpins, setShowSpins] = useState(false);
@@ -37,9 +65,14 @@ export default function WorkspaceLibrary() {
     new Set(jumps.map((jump) => getJumpFamily(jump)))
   );
 
+  function createElementId(id: string) {
+    nextElementId.current += 1;
+    return `${id}-${elementIdPrefix}-${nextElementId.current}`;
+  }
+
   function addJump(jump: Jump) {
     addElement({
-      id: `${jump.id}-${Date.now()}-${Math.random()}`,
+      id: createElementId(jump.id),
       code: jump.code,
       name: jump.name,
       type: "jump",
@@ -62,7 +95,7 @@ export default function WorkspaceLibrary() {
     baseValue: number
   ) {
     addElement({
-      id: `${id}-${Date.now()}-${Math.random()}`,
+      id: createElementId(id),
       code,
       name,
       type,
@@ -74,36 +107,6 @@ export default function WorkspaceLibrary() {
       notes: "",
       status: "valid",
     });
-  }
-
-  function Section({
-    title,
-    open,
-    toggle,
-    children,
-  }: {
-    title: string;
-    open: boolean;
-    toggle: () => void;
-    children: React.ReactNode;
-  }) {
-    return (
-      <div className="rounded-xl border border-slate-200">
-        <button
-          onClick={toggle}
-          className="flex w-full items-center justify-between p-4 font-medium transition hover:bg-slate-50"
-        >
-          <span>{title}</span>
-          {open ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-        </button>
-
-        {open && (
-          <div className="border-t border-slate-200">
-            {children}
-          </div>
-        )}
-      </div>
-    );
   }
 
   return (

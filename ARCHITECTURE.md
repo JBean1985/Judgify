@@ -1,129 +1,86 @@
-<<<<<<< HEAD
+# Arquitetura do Judgify
 
-=======
-# Judgify Architecture
+## Visão geral
 
-## Overview
-Judgify is a Next.js application built as a feature-driven platform for planning and validating figure skating programs. It is designed around a home assistant entry experience and a planner workspace. The app assembles UI features, planner logic, and domain rules while keeping most business behavior on the client side.
+O Judgify é uma aplicação Next.js organizada por funcionalidades para criar, validar e pontuar esquemas de patinagem artística. O fluxo principal começa no assistente da página inicial e segue para o espaço de planeamento. A maioria da lógica e do estado é executada no navegador.
 
-## Stack
-- Next.js 16 app router
-- React 19
-- TypeScript
-- Tailwind CSS
-- `lucide-react` for icons
+## Tecnologias
 
-## App Routes
-- `/` — home landing page and assistant entry point
-- `/planner` — planner workspace for building technical programs
-- `/video` — video analysis placeholder
-- `/live` — live analysis placeholder
-- `/athletes` — athletes management placeholder
+- Next.js 16 com App Router.
+- React 19 e TypeScript.
+- Tailwind CSS.
+- `lucide-react` para ícones.
+- Fontes de sistema, sem dependência de rede para carregamento tipográfico.
 
-## Main Folder Structure
-- `app/`
-  - Route pages and the global layout
-  - `globals.css` for appwide styling
-- `features/home/`
-  - Home landing and assistant prompt experience
-  - Quick actions, recent activity, and schema creation UI
-- `features/planner/`
-  - Planner workspace and program editor
-  - Element selection, technical sheet, coaching assistant, and scoring engines
-  - Planner rules and validation
-- `features/core/`
-  - Shared global context engine used for cross-page schema state
-- `features/dashboard/`
-  - Dashboard UI modules that are not currently routed
-- `shared/components/`
-  - Reusable UI primitives such as `Button`, `Card`, and `PageHeader`
-- `data/`
-  - Static domain data for choreography and element repositories
-- `types/`
-  - Shared TypeScript models for program and scoring domains
-- `docs/`
-  - Documentation placeholders and product notes
-- `core/`
-  - Present but unused in the current app logic
-- `services/`
-  - Empty placeholder directory for future backend or service integration
+## Rotas
 
-## Feature Modules
-### Home
-- `features/home/pages/WelcomeExperience.tsx`
-- `features/home/components/AiPrompt.tsx`
-- `features/home/components/AssistantResponse.tsx`
-- `features/home/components/QuickActions.tsx`
-- `features/home/components/RecentActivity.tsx`
-- `features/home/components/SchemaWizard.tsx`
-- `features/home/assistant/AssistantEngine.ts`
-- `features/home/assistant/intents.ts`
+- `/` — página inicial e entrada do assistente.
+- `/planner` — construtor de esquemas técnicos.
+- `/video` — página placeholder para análise de vídeo.
+- `/live` — página placeholder para análise em direto.
+- `/athletes` — página placeholder para gestão de atletas.
 
-### Planner
-- `app/planner/page.tsx`
-- `features/planner/components/workspace/PlannerWorkspace.tsx`
-- `features/planner/components/workspace/WorkspaceLibrary.tsx`
-- `features/planner/components/workspace/TechnicalPanel.tsx`
-- `features/planner/components/workspace/TechnicalSheet.tsx`
-- `features/planner/components/workspace/WorkspaceProgram.tsx`
-- `features/planner/components/workspace/WorkspaceHeader.tsx`
-- `features/planner/components/workspace/WorkspaceAssistant.tsx`
-- `features/planner/components/workspace/technical-sheet/TechnicalElementCard.tsx`
-- `features/planner/components/assistant/CoachAssistant.tsx`
-- `features/planner/components/ProgramEditor.tsx`
-- `features/planner/components/ElementPicker.tsx`
-- `features/planner/components/ElementList.tsx`
-- `features/planner/components/ScorePanel.tsx`
+## Estrutura principal
 
-### Planner Context & State
-- `features/planner/context/WorkspaceContext.tsx`
-- `features/planner/context/PlannerContext.tsx`
-- `features/planner/context/AssistantContext.tsx`
-- `features/planner/hooks/useAssistant.ts`
-- `features/planner/types/assistant.ts`
+- `app/` — páginas das rotas, layout e estilos globais.
+- `features/home/` — experiência inicial, assistente, ações rápidas, atividade recente e criação do contexto do esquema.
+- `features/planner/` — espaço de planeamento, biblioteca, folha técnica, painéis, contextos, motores, dados e regras.
+- `features/core/` — `ContextEngine` e tipos do contexto global do esquema.
+- `features/dashboard/` — módulos de dashboard existentes, mas não ligados a uma rota.
+- `features/workspace/` — componentes atualmente vazios ou inativos.
+- `shared/` — componentes e layouts reutilizáveis.
+- `core/` — dados e regras de domínio; vários ficheiros continuam vazios ou inativos.
+- `types/` — modelos de domínio partilhados.
+- `docs/` — documentação complementar, ainda maioritariamente vazia.
 
-### Engines and Rules
-- `features/planner/engine/TechnicalEngine.ts`
-- `features/planner/engine/DifficultyEngine.ts`
-- `features/planner/engine/ValidationEngine.ts`
-- `features/planner/rules/ProgramRules.ts`
-- `features/planner/rules/categories.ts`
-- `features/planner/rules/disciplines.ts`
-- `features/planner/rules/programTypes.ts`
-- `features/planner/rules/goe/jumps.ts`
+## Fluxo da aplicação
 
-### Shared Core
-- `features/core/context/ContextEngine.ts`
-- `features/core/context/types.ts`
+1. A página inicial apresenta o assistente e as ações rápidas.
+2. O fluxo de criação recolhe atleta, categoria e disciplina e chama `ContextEngine.set()`.
+3. A aplicação navega para `/planner`.
+4. `PlannerWorkspace` consulta o `ContextEngine`; sem os três campos obrigatórios, apresenta o estado “Nenhum esquema ativo”.
+5. Com contexto válido, `WorkspaceProvider` disponibiliza os elementos e as operações do programa à biblioteca, folha técnica e painéis.
 
-## State Flow
-- `ContextEngine` acts as a global singleton storing the active schema context (`athlete`, `category`, `discipline`, and `currentModule`).
-- The planner workspace reads from `ContextEngine` to determine whether a schema is active.
-- `WorkspaceContext` manages planner program elements and provides operations to add, update, reorder, and remove elements.
-- `PlannerContext` exists as a higher-level planner state holder but is not fully wired into the active planner route.
-- `AssistantContext` is defined for assistant flows but is not clearly consumed by the current page structure.
+## Estado e persistência
 
-## Scoring and Validation Architecture
-- `TechnicalEngine` calculates the technical score as `baseValue + goe + pcs - deductions`, but PCS and deductions are currently unimplemented placeholders.
-- `DifficultyEngine` derives a difficulty score and athlete level from element counts, base values, and GOE.
-- `ValidationEngine` applies category-specific maximums and repeated-element warnings using rules from `ProgramRules`.
-- Category definitions provide concrete constraints such as maximum jumps, spins, and sequences.
+### `ContextEngine`
 
-## Disconnected and Incomplete Areas
-- Dashboard modules exist under `features/dashboard/` but are not exposed through any route.
-- Several planner modules are incomplete or unused, including `features/planner/index.ts` and `features/planner/plannerData.ts`.
-- `core/` and `services/` are present but empty or inactive.
-- Placeholder routes exist for `/video`, `/live`, and `/athletes`.
-- `docs/architecture.md` is empty, indicating documentation gaps.
-- There are duplicate domain types in top-level `types/` and `features/planner/types/`.
+- Singleton global com `get`, `set`, `clear` e `hasContext`.
+- Mantém atleta, categoria, disciplina, competição e módulo atual em memória.
+- Escreve atualizações na chave `judgify-global-context` do `localStorage` e remove-a ao limpar.
+- Não lê atualmente o valor guardado ao iniciar; um recarregamento pode, por isso, perder o contexto necessário para entrar no planeador.
 
-## Architectural Risks
-- Global mutable state via `ContextEngine` is brittle and not aligned with React/Next.js best practices.
-- In-memory planner state is not persisted; page refresh loses the current program.
-- The planner assistant flow is partially wired and may lead to inconsistent behavior.
-- Empty feature modules and folders create confusion about the intended architecture.
-- The app currently lacks a backend or service integration layer.
+### `WorkspaceContext`
 
-## Summary
-Judgify is a structured prototype for figure skating program planning with a clear home-to-planner path. Its core architecture is in place, but state management, scoring completeness, and feature wiring need stabilization before expansion.
->>>>>>> 034504a (Sprint 1: Foundation and architecture)
+- Contexto React ativo do programa técnico.
+- Gere adição, atualização, remoção, reordenação e limpeza de elementos.
+- Recupera os elementos da chave `judgify-planner-elements` do `localStorage`.
+- Volta a guardar a coleção sempre que os elementos mudam.
+
+`PlannerContext` e `AssistantContext` também existem, mas não estão totalmente integrados no fluxo ativo. Não existe uma camada de backend ou persistência remota confirmada no código atual.
+
+## Motores e regras
+
+- `TechnicalEngine` soma valor base e GOE e calcula `baseValue + goe + pcs - deductions`; PCS e deduções permanecem a zero.
+- `DifficultyEngine` calcula totais, médias, contagens por tipo, índice de dificuldade e nível.
+- `ValidationEngine` verifica repetições e máximos por categoria através de `ProgramRules`; usa atualmente `free` e `long` como disciplina e tipo de programa fixos.
+- `features/planner/rules/` define categorias, disciplinas, tipos de programa e valores GOE de saltos.
+
+## Áreas incompletas e riscos
+
+- O contexto global guardado não é restaurado, embora os elementos do programa tenham persistência local funcional.
+- PCS e deduções ainda não estão implementados.
+- Disciplina e tipo de programa ainda não são propagados para a validação.
+- `PlannerContext` e `AssistantContext` estão apenas parcialmente integrados.
+- Dashboard, componentes vazios e entradas de módulos inativas criam caminhos arquiteturais concorrentes.
+- Existem tipos sobrepostos entre `types/` e `features/planner/types/`.
+- `/video`, `/live` e `/athletes` não têm funcionalidade para além do placeholder.
+- Não existe uma suite de testes automatizados configurada.
+
+## Princípios de evolução
+
+- Preservar o fluxo e o design existentes durante refatorações técnicas.
+- Consolidar o estado antes de expandir funcionalidades.
+- Confirmar regras de negócio antes de completar os motores.
+- Reutilizar tipos, contextos e componentes existentes e eliminar duplicação de forma incremental.
+- Tratar as páginas placeholder como trabalho futuro.

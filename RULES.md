@@ -1,122 +1,100 @@
-<<<<<<< HEAD
+# Regras de negócio do Judgify
 
-=======
-# Judgify Business Rules
+Este documento descreve o comportamento atualmente implementado. Os limites de categoria estão em `features/planner/rules/categories.ts`; a sua aplicação está em `features/planner/engine/ValidationEngine.ts`.
 
-## Category Constraints
-Rules are defined in `features/planner/rules/categories.ts` and enforced by `ValidationEngine`.
+## Limites por categoria
 
-### Benjamins
-- `maxElements`: 10
-- `maxJumps`: 5
-- `maxSpins`: 2
-- `maxSequences`: 1
-- `allowRepeatedJump`: false
-- `programDuration`: 120
+| Categoria | Elementos | Saltos | Piruetas | Sequências | Salto repetido | Duração (s) |
+| --- | ---: | ---: | ---: | ---: | :---: | ---: |
+| Benjamins | 10 | 5 | 2 | 1 | Não | 120 |
+| Iniciados | 10 | 6 | 2 | 1 | Não | 150 |
+| Cadetes | 11 | 6 | 3 | 1 | Não | 180 |
+| Juvenis | 12 | 7 | 3 | 1 | Não | 210 |
+| Juniores | 12 | 7 | 3 | 1 | Sim | 240 |
+| Seniores | 13 | 8 | 3 | 1 | Sim | 270 |
 
-### Iniciados
-- `maxElements`: 10
-- `maxJumps`: 6
-- `maxSpins`: 2
-- `maxSequences`: 1
-- `allowRepeatedJump`: false
-- `programDuration`: 150
+A propriedade `allowRepeatedJump` faz parte das definições de categoria, mas o `ValidationEngine` ainda não a consulta. Atualmente, qualquer código de elemento repetido produz um aviso e não torna, por si só, o programa inválido.
 
-### Cadetes
-- `maxElements`: 11
-- `maxJumps`: 6
-- `maxSpins`: 3
-- `maxSequences`: 1
-- `allowRepeatedJump`: false
-- `programDuration`: 180
+## Validação do programa
 
-### Juvenis
-- `maxElements`: 12
-- `maxJumps`: 7
-- `maxSpins`: 3
-- `maxSequences`: 1
-- `allowRepeatedJump`: false
-- `programDuration`: 210
+- A categoria predefinida de `ValidationEngine.validate()` é `Juvenis`.
+- `ProgramRules` procura a categoria pelo nome, sem distinguir maiúsculas de minúsculas.
+- A validação usa atualmente a disciplina `free` e o tipo de programa `long` como valores fixos.
+- Se a categoria não for encontrada, são usados os limites de segurança: 10 elementos, 7 saltos, 3 piruetas e 1 sequência.
+- Exceder qualquer máximo produz um erro e torna o programa inválido.
+- Repetir um código de elemento produz um aviso.
+- Um programa é considerado válido quando não existem mensagens do tipo `error`.
 
-### Juniores
-- `maxElements`: 12
-- `maxJumps`: 7
-- `maxSpins`: 3
-- `maxSequences`: 1
-- `allowRepeatedJump`: true
-- `programDuration`: 240
+## GOE de saltos
 
-### Seniores
-- `maxElements`: 13
-- `maxJumps`: 8
-- `maxSpins`: 3
-- `maxSequences`: 1
-- `allowRepeatedJump`: true
-- `programDuration`: 270
+A tabela em `features/planner/rules/goe/jumps.ts` associa, para cada código disponível, graus de `-3` a `3` a valores GOE. Exemplos:
 
-## Program Validation Rules
-Implemented in `features/planner/engine/ValidationEngine.ts`.
+- `1A`: `-0.30`, `-0.20`, `-0.10`, `0.00`, `0.10`, `0.20`, `0.30`.
+- `2A`: `-0.90`, `-0.60`, `-0.30`, `0.00`, `0.30`, `0.60`, `0.90`.
+- `3A`: `-2.10`, `-1.40`, `-0.70`, `0.00`, `0.70`, `1.40`, `2.10`.
+- `1Lz`: `-0.18`, `-0.12`, `-0.06`, `0.00`, `0.06`, `0.12`, `0.18`.
+- `2Lz`: `-0.63`, `-0.42`, `-0.21`, `0.00`, `0.21`, `0.42`, `0.63`.
+- `3Lz`: `-1.77`, `-1.18`, `-0.59`, `0.00`, `0.59`, `1.18`, `1.77`.
 
-- A repeated element is allowed but is flagged as a warning.
-- If the number of program elements exceeds `maxElements`, the program is invalid.
-- If the number of jumps exceeds `maxJumps`, the program is invalid.
-- If the number of spins exceeds `maxSpins`, the program is invalid.
-- If the number of sequences exceeds `maxSequences`, the program is invalid.
+`TechnicalEngine.getGoeValue()` devolve o grau recebido quando não encontra uma regra para o código e devolve zero quando a regra existe, mas não contém o grau pedido.
 
-## GOE Rules for Jumps
-Defined in `features/planner/rules/goe/jumps.ts`.
+## Pontuação técnica
 
-For each jump code, GOE grade maps to a GOE value as follows:
-- `-3` through `3` are converted by lookup values.
-- Example values:
-  - `1A`: `-0.30`, `-0.20`, `-0.10`, `0.00`, `0.10`, `0.20`, `0.30`
-  - `2A`: `-0.90`, `-0.60`, `-0.30`, `0.00`, `0.30`, `0.60`, `0.90`
-  - `3A`: `-2.10`, `-1.40`, `-0.70`, `0.00`, `0.70`, `1.40`, `2.10`
-  - `1Lz`: `-0.18`, `-0.12`, `-0.06`, `0.00`, `0.06`, `0.12`, `0.18`
-  - `2Lz`: `-0.63`, `-0.42`, `-0.21`, `0.00`, `0.21`, `0.42`, `0.63`
-  - `3Lz`: `-1.77`, `-1.18`, `-0.59`, `0.00`, `0.59`, `1.18`, `1.77`
+O `TechnicalEngine`:
 
-## Scoring Rules
-Implemented in `features/planner/engine/TechnicalEngine.ts`.
+- soma o `baseValue` de todos os elementos;
+- soma o `goeValue` de todos os elementos;
+- calcula `total = baseValue + goe + pcs - deductions`;
+- devolve atualmente `pcs = 0` e `deductions = 0`.
 
-- Total technical score is computed as: `baseValue + goe + pcs - deductions`.
-- Currently, `pcs` and `deductions` are returned as `0`.
+PCS e deduções são, portanto, parcelas previstas mas ainda não implementadas.
 
-## Difficulty Rules
-Implemented in `features/planner/engine/DifficultyEngine.ts`.
+## Dificuldade
 
-- Difficulty analysis groups elements into jumps, spins, and sequences.
-- Difficulty index = `totalBaseValue + averageGOE + jumps * 0.5 + spins * 0.25 + sequences * 0.25`.
-- Level assignments:
-  - `Iniciante` for difficulty below 10
-  - `Intermédio` for difficulty from 10 to 19.999...
-  - `Avançado` for difficulty from 20 to 29.999...
-  - `Elite` for difficulty 30 and above
+O `DifficultyEngine` agrupa os elementos de acordo com `category`: `jump`, `spin` e `sequence`.
 
-## Intent Recognition Rules
-Implemented in `features/home/assistant/intents.ts` and used by `features/home/assistant/AssistantEngine.ts`.
+O índice é calculado por:
 
-- Keywords map to modules:
-  - Planner: `programa`, `esquema`, `folha técnica`, `criar programa`, `program`
-  - Video: `vídeo`, `video`, `analisar`, `gravação`
-  - Live: `live`, `competição`, `direto`, `campeonato`
-  - Athletes: `atleta`, `patinadora`, `perfil`, `evolução`
+`totalBaseValue + averageGOE + jumps × 0,5 + spins × 0,25 + sequences × 0,25`
 
-## Available Disciplines and Program Types
-Defined in planner rule modules.
+Os níveis são:
 
-### Disciplines
-- `free` — Livre
-- `solo-dance` — Solo Dance
-- `pairs` — Pares
-- `precision` — Precisão
+- `Iniciante` — índice inferior a 10;
+- `Intermédio` — índice maior ou igual a 10 e inferior a 20;
+- `Avançado` — índice maior ou igual a 20 e inferior a 30;
+- `Elite` — índice maior ou igual a 30.
 
-### Program Types
-- `short` — Programa Curto
-- `long` — Programa Longo
+Numa lista vazia, os totais, as médias, as contagens e o índice são zero.
 
-## Context and Flow Rules
-- `ContextEngine` stores active schema properties: `athlete`, `category`, `discipline`, `competition`, and `currentModule`.
-- Planner workspace only activates when `athlete`, `category`, and `discipline` are present in context.
-- Home assistant uses `ContextEngine.set()` to populate schema context before navigation to `/planner`.
->>>>>>> 034504a (Sprint 1: Foundation and architecture)
+## Reconhecimento de intenções
+
+As palavras-chave estão em `features/home/assistant/intents.ts` e são usadas por `AssistantEngine`:
+
+- Planeador: `programa`, `esquema`, `folha técnica`, `criar programa`, `program`.
+- Vídeo: `vídeo`, `video`, `analisar`, `gravação`.
+- Direto: `live`, `competição`, `direto`, `campeonato`.
+- Atletas: `atleta`, `patinadora`, `perfil`, `evolução`.
+
+## Disciplinas e tipos de programa
+
+Disciplinas definidas:
+
+- `free` — Livre;
+- `solo-dance` — Solo Dance;
+- `pairs` — Pares;
+- `precision` — Precisão.
+
+Tipos de programa definidos:
+
+- `short` — Programa Curto;
+- `long` — Programa Longo.
+
+Estas definições são transportadas por `ProgramRules`, mas ainda não alteram os limites devolvidos: os limites implementados vêm da categoria.
+
+## Contexto e fluxo
+
+- `ContextEngine` pode manter `athlete`, `category`, `discipline`, `competition` e `currentModule`.
+- O planeador só ativa o espaço de trabalho quando atleta, categoria e disciplina estão presentes no contexto em memória.
+- O fluxo inicial usa `ContextEngine.set()` antes de navegar para `/planner`.
+- O `ContextEngine` escreve o contexto em `localStorage`, mas não o restaura atualmente ao iniciar.
+- O `WorkspaceContext` restaura e guarda separadamente os elementos do programa em `localStorage`.
