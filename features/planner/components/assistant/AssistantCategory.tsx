@@ -33,7 +33,7 @@ const categories = [
     title: "Sénior",
     description: "Máxima exigência competitiva.",
   },
-];
+] as const;
 
 export default function AssistantCategory() {
   const { state, update } = useAssistant();
@@ -57,7 +57,7 @@ export default function AssistantCategory() {
             key={category.id}
             onClick={() =>
               update({
-                category: category.id as any,
+                category: category.id,
               })
             }
             className={`

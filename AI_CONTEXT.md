@@ -1,130 +1,111 @@
-<<<<<<< HEAD
 # Judgify — Contexto para IA
 
-Judgify é uma aplicação web em Next.js/React para criação e pontuação de esquemas de patinagem artística.
-
 ## Objetivo
-A aplicação deve ajudar treinadores, atletas e juízes a analisar esquemas, calcular dificuldade técnica e organizar elementos de patinagem artística.
 
-## Estado atual
-- Projeto em Next.js/React.
-- Interface já criada parcialmente.
-- Existe um motor de dificuldade: `DifficultyEngine.ts`.
-- A app deve ser simples, rápida e intuitiva.
-- O utilizador trabalha diretamente pelo GitHub/Codespaces, sem instalação local.
+O Judgify é uma aplicação web em Next.js e React para apoiar treinadores, atletas e juízes na criação, organização, validação e pontuação de esquemas de patinagem artística. A experiência principal liga um assistente na página inicial a um espaço de planeamento técnico.
 
-## Regras importantes
-- Não partir funcionalidades que já funcionam.
-- Manter o design atual.
-- Sempre que alterar código, explicar que ficheiros foram alterados.
-- Preferir alterações completas e prontas a copiar/colar.
-- Código em TypeScript sempre que possível.
-- Interface em português de Portugal.
+A aplicação deve manter-se simples, rápida e intuitiva. A interface e os textos apresentados ao utilizador devem usar português de Portugal.
 
-## Próximos módulos
-- Motor de dificuldade.
-- Sistema GOE.
-- Pontuação técnica.
-- Pontuação artística/componentes.
-- Organização de atletas, categorias e disciplinas.
-- Análise de esquema.
-- Exportação ou resumo final.
-=======
-# Judgify AI Context
+## Ambiente de desenvolvimento
 
-## Project Purpose
-Judgify is a Next.js application designed to support figure skating program planning, scoring guidance, and future AI-assisted analysis. It combines a home assistant-style entry point with a planner workspace for building and validating skating programs.
+O desenvolvimento é feito pelo Codex Cloud no navegador, ligado diretamente ao GitHub. Não se assume uma instalação local como fluxo de trabalho atual.
 
-## Current Routes
-- `/` — Home landing page and assistant entry experience.
-- `/planner` — Planner workspace for building a technical program.
-- `/video` — Video analysis placeholder page.
-- `/live` — Live analysis placeholder page.
-- `/athletes` — Athletes management placeholder page.
+## Tecnologia e organização
 
-## Folder Structure
-- `app/`
-  - Next.js route entries and application layout.
-  - Contains global CSS and page-level route components.
-- `features/home/`
-  - Home experience, assistant prompt, quick actions, and welcome screen.
-- `features/planner/`
-  - Core planner workspace, program editing UI, rules, engines, and planner-specific state.
-- `features/core/`
-  - Shared global context engine used across home and planner flows.
-- `shared/components/`
-  - Reusable UI primitives such as buttons, cards, and page headers.
-- `data/`
-  - Static domain data for elements, choreography, and scoring repositories.
-- `types/`
-  - Shared TypeScript domain models for program elements, programs, and scoring.
-- `docs/`
-  - Product and architecture documentation; currently largely placeholders.
-- `core/`
-  - Present but not used in the current app logic.
-- `services/`
-  - Empty placeholder for future service or API logic.
+- Next.js 16 com App Router.
+- React 19 e TypeScript.
+- Tailwind CSS para estilos e `lucide-react` para ícones.
+- `app/` contém as entradas das rotas, o layout global e os estilos globais.
+- `features/home/` contém a experiência inicial, o assistente, as ações rápidas e a atividade recente.
+- `features/planner/` contém o espaço de planeamento, biblioteca de elementos, folha técnica, contextos, regras e motores.
+- `features/core/` contém o `ContextEngine`, usado para transportar o contexto do esquema entre o início e o planeador.
+- `shared/` contém componentes e elementos de layout reutilizáveis.
+- `core/` e `types/` contêm dados, regras e tipos de domínio partilhados; existem ainda tipos sobrepostos em `features/planner/types/`.
+- `docs/` contém documentação complementar, ainda maioritariamente por preencher.
 
-## Active Features
-- Home welcome experience with AI-style prompt and assistant response UI.
-- Planner workspace with library, technical sheet, and editable program elements.
-- Element selection across jumps, spins, and sequences.
-- Program validation and scoring support in the planner.
-- Category and discipline rule definitions for program limits.
-- Simple assistant intent recognition via keyword matching.
+## Rotas atuais
 
-## Known Disconnected or Incomplete Features
-- `features/dashboard/` exists but is not wired into app routes.
-- `core/index.ts` is empty and the `core/` folder appears unused.
-- `features/planner/index.ts` and `features/planner/plannerData.ts` are empty.
-- `features/planner/context/PlannerContext.tsx` and `AssistantContext.tsx` are implemented but not fully integrated.
-- `services/` folder is empty and not used.
-- Placeholder route pages: `/video`, `/live`, `/athletes`.
-- `docs/architecture.md` is empty and does not describe system architecture.
-- Duplicate or overlapping type definitions exist between top-level `types/` and `features/planner/types/`.
+### Funcionais
 
-## Scoring Engines
-- `features/planner/engine/TechnicalEngine.ts`
-  - Computes base value, GOE value, PCS, deductions, and total score.
-  - Current implementation returns `pcs = 0` and `deductions = 0` as stubs.
-- `features/planner/engine/DifficultyEngine.ts`
-  - Calculates difficulty index and level based on element count, base value, GOE, and category counts.
-- `features/planner/engine/ValidationEngine.ts`
-  - Validates program composition against category-based maximums and repeated elements.
-  - Uses `ProgramRules.getRules()` and category definitions from `features/planner/rules/`.
+- `/` — página inicial com experiência de boas-vindas, assistente, ações rápidas e atividade recente.
+- `/planner` — construtor de esquemas com biblioteca de elementos, folha técnica, painéis técnico e de treinador e suporte responsivo. Só apresenta o espaço de trabalho quando existem atleta, categoria e disciplina no `ContextEngine`.
 
-## State Management Risks
-- The app uses `ContextEngine` as a global mutable singleton for schema context.
-  - Risk: stale, inconsistent, or lost state across refreshes and multiple tabs.
-  - Risk: poor server-side and hydration behavior in Next.js.
-- Planner state is held only in memory via React `useState`.
-  - Risk: work is lost on page reload or app restart.
-- The planner assistant and context providers are not fully aligned with the route flow.
-  - Risk: partially wired state can lead to confusing user journeys and broken assumptions.
-- There is no persistence layer or backend service for planner programs.
+### Páginas placeholder
 
-## Development Rules for AI Agents
-- Do not modify application logic or components when updating documentation.
-- Keep AI recommendations aligned with the existing route structure and active modules.
-- Avoid introducing new runtime behavior unless the current architecture is explicitly extended.
-- Prefer safe improvements: documentation, refactor plans, and integration fixes over feature rewrites.
-- Use the planner context providers instead of the global `ContextEngine` for new state flows.
-- Treat placeholder pages as future work, not current functionality.
+- `/video` — apresenta apenas a indicação de que a análise de vídeo está em desenvolvimento.
+- `/live` — apresenta apenas a indicação de que a análise em direto está em desenvolvimento.
+- `/athletes` — apresenta apenas a indicação de que a gestão de atletas está em desenvolvimento.
 
-## Safe Next Development Roadmap
-1. Stabilize state management:
-   - Remove reliance on `ContextEngine` for app flow and replace it with React-serializable context or route state.
-   - Consolidate planner state in `features/planner/context/WorkspaceContext.tsx` and/or `PlannerContext.tsx`.
-2. Persist planner data locally:
-   - Add local storage or session persistence so users do not lose program state on refresh.
-3. Complete scoring logic:
-   - Implement PCS and deduction calculations in `TechnicalEngine`.
-   - Ensure validation uses real discipline and program type values instead of hardcoded defaults.
-4. Clean up unused modules:
-   - Remove empty feature entry files or wire them properly.
-   - Consolidate duplicate type definitions.
-5. Expose dashboard or remove unused dashboard feature from the current route surface.
-6. Add documentation and tests:
-   - Populate `docs/architecture.md` and `README.md`.
-   - Add unit tests for the planner engines and key context providers.
->>>>>>> 034504a (Sprint 1: Foundation and architecture)
+## Funcionalidades concluídas
+
+- Experiência inicial com entrada orientada por assistente e reconhecimento simples de intenções por palavras-chave.
+- Criação do contexto base de um esquema com atleta, categoria e disciplina antes da navegação para o planeador.
+- Espaço de planeamento com elementos de saltos, piruetas e sequências.
+- Operações para adicionar, editar, remover, reordenar e limpar elementos do esquema.
+- Persistência local dos elementos do planeador em `localStorage`, através da chave `judgify-planner-elements`; o `WorkspaceContext` recupera os elementos guardados ao iniciar e volta a guardá-los quando são alterados.
+- Cálculo do valor base, GOE e total técnico disponível no `TechnicalEngine`.
+- Análise de dificuldade disponível no `DifficultyEngine`, incluindo totais, médias, contagem por tipo, índice de dificuldade e nível.
+- Validação de limites de elementos, saltos, piruetas e sequências, com avisos para elementos repetidos.
+- Definições de categorias, disciplinas, tipos de programa e tabela de GOE para saltos.
+
+## Funcionalidades incompletas ou parcialmente integradas
+
+- O `TechnicalEngine` mantém PCS e deduções com valor fixo de zero; estas parcelas da pontuação ainda não estão implementadas.
+- O `ValidationEngine` aceita a categoria, mas usa atualmente disciplina `free` e tipo de programa `long` como valores fixos.
+- O `ContextEngine` mantém o contexto ativo num singleton em memória e escreve-o em `localStorage` com a chave `judgify-global-context`, mas não recupera atualmente esse valor guardado. Por isso, o contexto necessário para abrir o planeador pode perder-se após um recarregamento, mesmo que os elementos do esquema estejam persistidos pelo `WorkspaceContext`.
+- `PlannerContext` e `AssistantContext` existem, mas não estão totalmente integrados no fluxo ativo do planeador.
+- Os módulos em `features/dashboard/` não estão ligados a nenhuma rota.
+- `features/planner/index.ts`, `features/planner/plannerData.ts`, vários ficheiros em `core/` e vários componentes de `features/workspace/` estão vazios ou inativos.
+- Não existe no estado atual uma camada de serviço ou backend para sincronização remota, autenticação ou armazenamento de programas no servidor.
+- A documentação em `docs/` e o `README.md` ainda não descrevem integralmente a arquitetura e o funcionamento do produto.
+- Não existem testes automatizados configurados no `package.json`.
+
+## Estado e persistência
+
+- `ContextEngine` é um singleton global com as operações `get`, `set`, `clear` e `hasContext`. Guarda atleta, categoria, disciplina, competição e módulo atual; a escrita e remoção em `localStorage` estão implementadas, mas a leitura inicial não está ligada.
+- `WorkspaceContext` é o estado React ativo do programa técnico. Gere a coleção de elementos e fornece operações de adição, atualização, remoção, reordenação e limpeza.
+- Os elementos do programa têm persistência local funcional no navegador. Esta persistência é distinta do contexto do esquema gerido pelo `ContextEngine`.
+- Não há confirmação no código atual de persistência remota ou de gravação de programas completos num backend.
+
+## Motores técnicos
+
+### `TechnicalEngine`
+
+- Soma os valores base e os valores GOE dos elementos.
+- Consulta a tabela de GOE de saltos quando é solicitado um valor por código e grau.
+- Calcula o total como `valor base + GOE + PCS - deduções`.
+- PCS e deduções continuam por implementar e são atualmente zero.
+
+### `DifficultyEngine`
+
+- Agrupa elementos em saltos, piruetas e sequências.
+- Calcula valor base total e médio, GOE médio e índice de dificuldade.
+- Classifica o resultado como `Iniciante`, `Intermédio`, `Avançado` ou `Elite`.
+
+### `ValidationEngine`
+
+- Obtém limites através de `ProgramRules` e das regras de categoria.
+- Produz erros quando são excedidos os máximos de elementos ou de cada tipo.
+- Produz avisos para códigos de elementos repetidos.
+- Considera o programa válido quando não existem mensagens de erro.
+
+## Prioridades de desenvolvimento seguro
+
+1. Restaurar de forma segura o contexto guardado ou consolidar o fluxo no contexto React, sem quebrar a navegação atual.
+2. Alinhar `ContextEngine`, `WorkspaceContext`, `PlannerContext` e `AssistantContext` para evitar estados divergentes.
+3. Completar PCS e deduções no motor técnico com regras de negócio confirmadas.
+4. Passar disciplina e tipo de programa reais ao motor de validação.
+5. Consolidar tipos duplicados e decidir se os módulos vazios devem ser implementados ou removidos.
+6. Adicionar testes para motores, persistência, contextos e fluxos entre rotas.
+7. Desenvolver as páginas placeholder apenas quando os respetivos requisitos estiverem definidos.
+
+## Regras para alterações futuras
+
+- Não quebrar funcionalidades existentes.
+- Manter o design e os textos visíveis, salvo indicação explícita em contrário.
+- Usar português de Portugal na interface e na documentação destinada ao produto.
+- Confirmar sempre o estado real do código antes de descrever uma funcionalidade como concluída, ausente ou persistente.
+- Não inventar regras de patinagem, pontuação ou validação; usar apenas regras confirmadas no código ou fornecidas pelo responsável do projeto.
+- Preferir TypeScript e reutilizar os contextos, tipos, componentes e regras existentes.
+- Explicar claramente todos os ficheiros alterados e as verificações executadas.
+- Tratar `/video`, `/live` e `/athletes` como trabalho futuro, não como funcionalidades ativas.

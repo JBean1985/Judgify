@@ -1,119 +1,58 @@
-<<<<<<< HEAD
+# Roteiro do Judgify
 
-=======
-# Judgify Roadmap
+## Concluído
 
-## Completed Work
-- Bootstrapped a Next.js 16 app with React 19 and Tailwind CSS.
-- Implemented a home landing experience with assistant prompt and quick action cards.
-- Built a planner workspace UI with element library, technical sheet, and program editor.
-- Added a global schema context engine (`ContextEngine`) for cross-route state.
-- Implemented core scoring engine modules:
-  - `TechnicalEngine`
-  - `DifficultyEngine`
-  - `ValidationEngine`
-- Defined skating rules and data models:
-  - category rules in `features/planner/rules/categories.ts`
-  - disciplines and program types
-  - jump GOE value table in `features/planner/rules/goe/jumps.ts`
-- Created reusable shared UI components in `shared/components/`.
-- Added planner state context for element operations in `features/planner/context/WorkspaceContext.tsx`.
+- Aplicação base em Next.js 16, React 19, TypeScript e Tailwind CSS.
+- Página inicial com assistente, ações rápidas e atividade recente.
+- Fluxo de recolha de atleta, categoria e disciplina antes da abertura do planeador.
+- Rota `/planner` com biblioteca de elementos, folha técnica, painel técnico, painel de treinador e experiência responsiva.
+- Operações de adição, edição, remoção, reordenação e limpeza de elementos.
+- Persistência local dos elementos do planeador através do `WorkspaceContext` e de `localStorage`.
+- Motores `TechnicalEngine`, `DifficultyEngine` e `ValidationEngine` em funcionamento para as parcelas já implementadas.
+- Regras de categorias, disciplinas, tipos de programa e GOE de saltos.
+- Componentes e layouts reutilizáveis em `shared/`.
+- Rotas placeholder criadas para `/video`, `/live` e `/athletes`.
+- Remoção da dependência de rede para carregar fontes durante o build.
 
-## Work In Progress
-- Planner route integration is partially complete but still relies on the global `ContextEngine`.
-- Assistant flow is available in the home experience but not fully integrated into planner context.
-- `TechnicalEngine` has score placeholders for `pcs` and `deductions`.
-- `ValidationEngine` uses hardcoded discipline and program type defaults.
-- Planner contexts such as `PlannerContext` and `AssistantContext` are implemented but not fully wired.
-- Dashboard UI modules exist but are not connected to routes.
+## Em curso ou incompleto
 
-## Existing Modules
-### Routing and App Shell
-- `app/layout.tsx`
-- `app/page.tsx`
-- `app/planner/page.tsx`
-- `app/video/page.tsx`
-- `app/live/page.tsx`
-- `app/athletes/page.tsx`
+- Restauro do contexto de esquema guardado pelo `ContextEngine` após recarregamento.
+- Integração consistente entre `ContextEngine`, `WorkspaceContext`, `PlannerContext` e `AssistantContext`.
+- Cálculo de PCS e deduções no `TechnicalEngine`.
+- Utilização da disciplina e do tipo de programa reais pelo `ValidationEngine`.
+- Decisão sobre integração ou remoção dos módulos de dashboard e dos ficheiros vazios ou inativos.
+- Consolidação dos tipos sobrepostos entre `types/` e `features/planner/types/`.
+- Documentação detalhada em `README.md` e `docs/`.
+- Testes automatizados para motores, contextos, persistência e rotas.
 
-### Home and Assistant
-- `features/home/pages/WelcomeExperience.tsx`
-- `features/home/components/AiPrompt.tsx`
-- `features/home/components/AssistantResponse.tsx`
-- `features/home/components/QuickActions.tsx`
-- `features/home/components/RecentActivity.tsx`
-- `features/home/components/SchemaWizard.tsx`
-- `features/home/assistant/AssistantEngine.ts`
-- `features/home/assistant/intents.ts`
+## Próximas etapas
 
-### Planner and Workspace
-- `features/planner/components/workspace/PlannerWorkspace.tsx`
-- `features/planner/components/workspace/WorkspaceLibrary.tsx`
-- `features/planner/components/workspace/TechnicalPanel.tsx`
-- `features/planner/components/workspace/TechnicalSheet.tsx`
-- `features/planner/components/workspace/WorkspaceProgram.tsx`
-- `features/planner/components/workspace/WorkspaceHeader.tsx`
-- `features/planner/components/workspace/WorkspaceAssistant.tsx`
-- `features/planner/components/workspace/technical-sheet/TechnicalElementCard.tsx`
-- `features/planner/components/assistant/CoachAssistant.tsx`
-- `features/planner/components/ProgramEditor.tsx`
-- `features/planner/components/ElementPicker.tsx`
-- `features/planner/components/ElementList.tsx`
-- `features/planner/components/ScorePanel.tsx`
+### Curto prazo — estabilização
 
-### Planner State and Hooks
-- `features/planner/context/WorkspaceContext.tsx`
-- `features/planner/context/PlannerContext.tsx`
-- `features/planner/context/AssistantContext.tsx`
-- `features/planner/hooks/useAssistant.ts`
-- `features/planner/types/assistant.ts`
+1. Restaurar de forma segura o contexto local ou transferir a responsabilidade para um contexto React único.
+2. Garantir que o contexto do esquema e os elementos persistidos permanecem coerentes após navegação e recarregamento.
+3. Integrar ou retirar os contextos redundantes sem alterar o comportamento visível.
+4. Adicionar testes unitários aos motores e testes do ciclo de persistência.
+5. Atualizar o `README.md` e preencher a documentação técnica em `docs/`.
 
-### Rules and Engines
-- `features/planner/engine/TechnicalEngine.ts`
-- `features/planner/engine/DifficultyEngine.ts`
-- `features/planner/engine/ValidationEngine.ts`
-- `features/planner/rules/ProgramRules.ts`
-- `features/planner/rules/categories.ts`
-- `features/planner/rules/disciplines.ts`
-- `features/planner/rules/programTypes.ts`
-- `features/planner/rules/goe/jumps.ts`
+### Médio prazo — regras e produto
 
-### Shared Core
-- `features/core/context/ContextEngine.ts`
-- `features/core/context/types.ts`
+1. Implementar PCS e deduções com regras de negócio confirmadas.
+2. Propagar categoria, disciplina e tipo de programa reais para cálculo e validação.
+3. Consolidar tipos e dados de domínio duplicados.
+4. Definir requisitos antes de desenvolver `/video`, `/live` e `/athletes`.
+5. Decidir se o dashboard deve ser exposto por uma rota ou removido.
 
-### Static and Domain Data
-- `features/planner/data/jumps.ts`
-- `features/planner/data/spins.ts`
-- `features/planner/data/sequences.ts`
-- `features/planner/data/elements.ts`
-- `data/choreo.ts`
-- `data/elementRepository.ts`
-- `data/jumps.ts`
-- `data/spins.ts`
-- `data/steps.ts`
+### Longo prazo — plataforma
 
-## Future Milestones
-### Near-Term
-- Stabilize state management and remove reliance on global singleton context.
-- Persist planner state in local storage or session storage.
-- Wire `PlannerContext` and `AssistantContext` into the planner route.
-- Add route exposure for dashboard modules or remove unused dashboard code.
+1. Criar uma camada de backend para autenticação, sincronização e persistência remota.
+2. Permitir guardar, carregar, exportar e associar programas a atletas.
+3. Expandir o assistente para além do reconhecimento por palavras-chave.
+4. Desenvolver análise de vídeo e apoio em direto quando os requisitos estiverem validados.
 
-### Mid-Term
-- Complete the scoring model by implementing PCS and deductions.
-- Improve validation rules with real discipline and program type support.
-- Add route-level navigation for `video`, `live`, and `athletes` when those features are ready.
-- Consolidate duplicated type definitions.
-- Populate `docs/architecture.md` and `README.md`.
+## Limites do roteiro
 
-### Long-Term
-- Build a backend service layer for persistence, authentication, and richer AI integration.
-- Add tests for planner engines, context providers, and route flows.
-- Expand AI assistant capabilities beyond keyword detection.
-- Support full program saving, loading, and athlete management.
-
-## Notes
-- Avoid modifying application logic during documentation updates.
-- Keep roadmap items tightly coupled to existing modules and current repo boundaries.
->>>>>>> 034504a (Sprint 1: Foundation and architecture)
+- Não inventar regras de patinagem ou pontuação.
+- Não apresentar páginas placeholder como funcionalidades concluídas.
+- Não substituir funcionalidades estáveis durante trabalhos de documentação ou refatoração.
+- Manter as alterações alinhadas com os módulos e as rotas que existem no repositório.

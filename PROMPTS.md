@@ -1,30 +1,37 @@
-<<<<<<< HEAD
+# Prompts do Judgify
 
-=======
-# Judgify Prompts
+## Análise e documentação
 
-## Documentation Prompts
-- "Review the current Judgify repository and document the routing, feature modules, and state architecture without modifying application code."
-- "Generate a technical architecture summary for Judgify, including active routes, main folders, engines, and disconnected modules."
-- "Create a safe roadmap for Judgify that prioritizes state stabilization and scoring completeness over new feature expansion."
+- «Revê o repositório atual do Judgify e documenta as rotas, os módulos, o estado e a persistência sem alterar o código da aplicação.»
+- «Cria um resumo técnico da arquitetura do Judgify, distinguindo funcionalidades ativas, incompletas e páginas placeholder.»
+- «Compara a documentação com o código e identifica afirmações desatualizadas ou contraditórias.»
+- «Atualiza o roteiro do Judgify, dando prioridade à estabilização do estado, persistência e pontuação antes de adicionar funcionalidades.»
 
-## Development Prompts
-- "Identify all unused or partially wired modules in Judgify and recommend which ones should be removed or integrated first."
-- "Propose a safe refactor to replace the global `ContextEngine` with a React context-based state flow in Judgify."
-- "List the existing scoring and validation rules implemented in Judgify and explain where they are defined."
-- "Suggest the next three development milestones for Judgify based on the current repository state."
+## Desenvolvimento e refatoração
 
-## Testing and Validation Prompts
-- "Create a test plan for `features/planner/engine/TechnicalEngine.ts`, including edge cases for GOE and program totals."
-- "Describe how to validate `features/planner/engine/ValidationEngine.ts` against defined category rules in `features/planner/rules/categories.ts`."
+- «Identifica módulos vazios, inativos ou parcialmente integrados e propõe uma ordem segura para os integrar ou remover.»
+- «Propõe uma refatoração segura do `ContextEngine` e dos contextos React, preservando a navegação e os dados guardados.»
+- «Consolida tipos de domínio duplicados sem alterar o comportamento público dos componentes e motores.»
+- «Completa uma alteração usando os módulos existentes, sem criar regras de negócio não confirmadas.»
 
-## AI Agent Guidance Prompts
-- "When making Judgify documentation updates, do not modify `.ts`, `.tsx`, or `.css` files; only update documentation files."
-- "Use existing repository modules and current app routes to make recommendations in Judgify."
-- "Avoid inventing new business rules; only report rules that are already defined in code or data files."
+## Estado e persistência
 
-## Safe Refactor Prompts
-- "Refactor Judgify planner state management to persist workspace elements in local storage while preserving the existing UI behavior."
-- "Integrate `features/planner/context/PlannerContext.tsx` into the planner route and remove redundant global schema state usage."
-- "Refine Judgify scoring logic by implementing PCS and deductions in `TechnicalEngine` without changing current route structure."
->>>>>>> 034504a (Sprint 1: Foundation and architecture)
+- «Confirma no código quais os dados guardados em `localStorage`, quais são restaurados e o que acontece após um recarregamento.»
+- «Cria um plano de testes para a persistência de `WorkspaceContext` e para o ciclo de vida do contexto do esquema.»
+- «Propõe uma forma de alinhar `ContextEngine`, `WorkspaceContext`, `PlannerContext` e `AssistantContext` sem alterar a interface.»
+
+## Pontuação e validação
+
+- «Descreve as regras implementadas em `TechnicalEngine`, `DifficultyEngine` e `ValidationEngine`, indicando claramente as parcelas ainda incompletas.»
+- «Cria testes para o `TechnicalEngine`, incluindo lista vazia, valores GOE, códigos sem regra e total técnico.»
+- «Valida o `ValidationEngine` contra os limites definidos em `features/planner/rules/categories.ts`, incluindo máximos e repetições.»
+- «Propõe a integração de disciplina e tipo de programa reais na validação, sem inventar regras adicionais.»
+
+## Orientações para agentes de IA
+
+- «Confirma o estado real do código antes de afirmar que uma funcionalidade existe, está ausente ou tem persistência.»
+- «Usa português de Portugal na documentação e nos textos destinados ao produto.»
+- «Não alteres ficheiros `.ts`, `.tsx` ou `.css` quando a tarefa for exclusivamente documental.»
+- «Preserva rotas, comportamento e design, salvo autorização explícita para os alterar.»
+- «Não inventes regras de patinagem, pontuação ou validação; limita-te ao código e aos dados confirmados.»
+- «No final, indica todos os ficheiros alterados e os comandos de verificação executados.»

@@ -2,25 +2,6 @@ import { GlobalContext } from "./types";
 
 const STORAGE_KEY = "judgify-global-context";
 
-function readStoredContext(): GlobalContext {
-  if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
-    return {};
-  }
-
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-
-  if (!stored) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(stored) as GlobalContext;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
 function writeStoredContext(context: GlobalContext): void {
   if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
     return;
