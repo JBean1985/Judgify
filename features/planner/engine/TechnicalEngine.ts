@@ -1,5 +1,6 @@
 import type { ProgramElement } from "../../../types/element";
 import { jumpGoeRules } from "../rules/goe/jumps";
+import { ScoringEngine } from "./ScoringEngine";
 
 export interface TechnicalResult {
   elementsCount: number;
@@ -24,15 +25,9 @@ export class TechnicalEngine {
   }
 
   static calculate(elements: ProgramElement[]): TechnicalResult {
-    const baseValue = elements.reduce(
-      (total, element) => total + element.baseValue,
-      0
-    );
-
-    const goe = elements.reduce(
-      (total, element) => total + (element.goeValue as number),
-      0
-    );
+    const tes = ScoringEngine.calculateTES(elements);
+    const baseValue = tes.baseValue;
+    const goe = tes.goe;
 
     const pcs = 0;
     const deductions = 0;

@@ -7,9 +7,15 @@ import {
   Plus,
 } from "lucide-react";
 
+import { ContextEngine } from "@/features/core/context";
+
 import { useWorkspace } from "../../context";
 import { jumps, spins, sequences } from "../../data";
 import { Jump } from "../../data/jumps";
+import {
+  BuilderObjective,
+  ProgramBuilderEngine,
+} from "../../engine/ProgramBuilderEngine";
 
 const rotationLabels: Record<number, string> = {
   1: "Simples",
@@ -22,8 +28,58 @@ function getJumpFamily(jump: Jump) {
   return jump.family;
 }
 
+function ElementRow({
+  code,
+  name,
+  baseValue,
+  onAdd,
+}: {
+  code: string;
+  name: string;
+  baseValue: number;
+  onAdd: () => void;
+}) {
+  return (
+    <div className="grid grid-cols-[68px_minmax(0,1fr)_72px_36px] items-center gap-2 border-b border-slate-100 px-2 py-1.5 text-sm last:border-b-0">
+      <p className="truncate font-mono text-xs font-semibold text-slate-700">
+        {code}
+      </p>
+
+      <p className="truncate text-xs text-slate-800">{name}</p>
+
+      <p className="text-right text-xs tabular-nums text-slate-600">
+        {baseValue.toFixed(2)}
+      </p>
+
+      <button
+        onClick={onAdd}
+        className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-blue-600 transition hover:border-blue-500 hover:bg-blue-50"
+        aria-label={`Adicionar ${code}`}
+      >
+        <Plus size={15} />
+      </button>
+    </div>
+  );
+}
+
 export default function WorkspaceLibrary() {
-  const { addElement } = useWorkspace();
+  const { addElement, clearProgram, elements } = useWorkspace();
+  const context = ContextEngine.get();
+
+  const isFpp2026DraftProfile =
+    context.ruleProfile?.federation === "fpp" &&
+    context.ruleProfile?.season === "2026";
+
+  const [objective, setObjective] = useState<BuilderObjective>(
+    "seguro"
+  );
+  const [insertMode, setInsertMode] = useState<
+    "adicionar" | "substituir"
+  >("adicionar");
+  const [builderFeedback, setBuilderFeedback] = useState<{
+    tone: "success" | "warning";
+    message: string;
+  } | null>(null);
 
   const [showJumps, setShowJumps] = useState(true);
   const [showSpins, setShowSpins] = useState(false);
@@ -76,6 +132,66 @@ export default function WorkspaceLibrary() {
     });
   }
 
+  function handleGenerateSuggestion() {
+    const baseElements =
+      insertMode === "substituir" ? [] : elements;
+
+    const generated = ProgramBuilderEngine.buildSuggestion({
+      category: context.category,
+      discipline: context.discipline,
+      programType: context.programType,
+      ruleProfile: context.ruleProfile,
+      objective,
+      existingElements: baseElements,
+    });
+
+    if (insertMode === "substituir") {
+      clearProgram();
+    }
+
+    generated.elements.forEach((element, index) => {
+      addElement({
+        id: `${element.code}-${Date.now()}-${index}-${Math.random()}`,
+        code: element.code,
+        name: element.name,
+        type: element.type,
+        family: element.family,
+        category: element.category,
+        rotations: element.rotations,
+        baseValue: element.baseValue,
+        goeGrade: 0,
+        goeValue: 0,
+        notes: "",
+        status: "valid",
+      });
+    });
+
+    if (generated.addedCount === 0) {
+      setBuilderFeedback({
+        tone: "warning",
+        message:
+          "Não foram adicionados mais elementos porque o programa já atingiu os limites da categoria.",
+      });
+      return;
+    }
+
+    if (
+      generated.stopReason !== "none" ||
+      generated.addedCount < generated.requestedCount
+    ) {
+      setBuilderFeedback({
+        tone: "warning",
+        message: `Foram adicionados ${generated.addedCount} elementos. Alguns limites da categoria já foram atingidos.`,
+      });
+      return;
+    }
+
+    setBuilderFeedback({
+      tone: "success",
+      message: `Foram adicionados ${generated.addedCount} elementos.`,
+    });
+  }
+
   function Section({
     title,
     open,
@@ -91,7 +207,7 @@ export default function WorkspaceLibrary() {
       <div className="rounded-xl border border-slate-200">
         <button
           onClick={toggle}
-          className="flex w-full items-center justify-between p-4 font-medium transition hover:bg-slate-50"
+          className="flex w-full items-center justify-between px-2 py-2 text-sm font-medium transition hover:bg-slate-50"
         >
           <span>{title}</span>
           {open ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
@@ -108,22 +224,95 @@ export default function WorkspaceLibrary() {
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 p-5">
-        <h2 className="text-lg font-semibold">
-          Biblioteca
-        </h2>
+      <div className="border-b border-slate-200 p-3">
+        <h2 className="text-base font-semibold">Biblioteca</h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-xs text-slate-500">
           Escolha os elementos do esquema.
         </p>
       </div>
 
-      <div className="space-y-4 p-4">
+      <div className="max-h-[420px] space-y-2 overflow-y-auto p-3">
+        <section className="rounded-xl border border-slate-200 bg-slate-50 p-2">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+              Gerar sugestao de treino
+            </h3>
+
+            <div className="flex items-center gap-1.5">
+              <select
+                value={objective}
+                onChange={(event) =>
+                  setObjective(
+                    event.target.value as BuilderObjective
+                  )
+                }
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-blue-500"
+              >
+                <option value="seguro">Seguro</option>
+                <option value="competitivo">Competitivo</option>
+                <option value="elite">Elite</option>
+              </select>
+
+              <select
+                value={insertMode}
+                onChange={(event) =>
+                  setInsertMode(
+                    event.target
+                      .value as "adicionar" | "substituir"
+                  )
+                }
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-blue-500"
+              >
+                <option value="adicionar">Adicionar</option>
+                <option value="substituir">Substituir</option>
+              </select>
+            </div>
+          </div>
+
+          <p className="mt-1 text-[11px] text-slate-500">
+            Sugestao de treino. Validar sempre com regras oficiais FPP/World Skate.
+          </p>
+
+          {isFpp2026DraftProfile && (
+            <p className="mt-1 text-[11px] text-amber-700">
+              Perfil FPP 2026 em rascunho. As regras oficiais ainda nao estao confirmadas.
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleGenerateSuggestion}
+            className="mt-2 w-full rounded-md border border-blue-200 bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
+          >
+            Gerar programa base
+          </button>
+
+          {builderFeedback && (
+            <p
+              className={
+                builderFeedback.tone === "success"
+                  ? "mt-1 text-[11px] text-green-700"
+                  : "mt-1 text-[11px] text-amber-700"
+              }
+            >
+              {builderFeedback.message}
+            </p>
+          )}
+        </section>
+
         <Section
           title={`Saltos (${jumpFamilies.length})`}
           open={showJumps}
           toggle={() => setShowJumps(!showJumps)}
         >
+          <div className="grid grid-cols-[68px_minmax(0,1fr)_72px_36px] gap-2 border-b border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <span>Código</span>
+            <span>Elemento</span>
+            <span className="text-right">VB</span>
+            <span className="text-center">+</span>
+          </div>
+
           <div className="divide-y divide-slate-100">
             {jumpFamilies.map((family) => {
               const familyJumps = jumps.filter(
@@ -141,19 +330,14 @@ export default function WorkspaceLibrary() {
               if (!selectedJump) return null;
 
               return (
-                <div key={family} className="p-4">
-                  <div className="mb-4">
-                    <p className="font-semibold text-slate-900">
+                <div key={family} className="px-2 py-2">
+                  <div className="mb-2">
+                    <p className="text-xs font-semibold text-slate-900">
                       {family}
-                    </p>
-
-                    <p className="text-xs text-slate-500">
-                      Código {selectedJump.code} • VB{" "}
-                      {selectedJump.baseValue.toFixed(2)}
                     </p>
                   </div>
 
-                  <div className="mb-4 grid grid-cols-2 gap-2">
+                  <div className="mb-2 flex flex-wrap gap-1">
                     {familyJumps.map((jump) => (
                       <button
                         key={jump.id}
@@ -165,8 +349,8 @@ export default function WorkspaceLibrary() {
                         }
                         className={
                           selectedRotation === jump.rotations
-                            ? "rounded-xl border border-blue-600 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700"
-                            : "rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition hover:border-blue-400"
+                            ? "rounded-md border border-blue-600 bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-700"
+                            : "rounded-md border border-slate-200 px-2 py-1 text-[11px] text-slate-600 transition hover:border-blue-400"
                         }
                       >
                         {rotationLabels[jump.rotations]}
@@ -174,23 +358,12 @@ export default function WorkspaceLibrary() {
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => addJump(selectedJump)}
-                    className="flex w-full items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-left transition hover:border-blue-500 hover:bg-blue-50"
-                  >
-                    <div>
-                      <p className="font-medium">
-                        Adicionar {selectedJump.code}
-                      </p>
-
-                      <p className="text-xs text-slate-500">
-                        {selectedJump.name} • Valor Base{" "}
-                        {selectedJump.baseValue.toFixed(2)}
-                      </p>
-                    </div>
-
-                    <Plus size={18} className="text-blue-600" />
-                  </button>
+                  <ElementRow
+                    code={selectedJump.code}
+                    name={selectedJump.name}
+                    baseValue={selectedJump.baseValue}
+                    onAdd={() => addJump(selectedJump)}
+                  />
                 </div>
               );
             })}
@@ -198,35 +371,36 @@ export default function WorkspaceLibrary() {
         </Section>
 
         <Section
-          title={`Piruetas (${spins.length})`}
+          title={`Piões (${spins.length})`}
           open={showSpins}
           toggle={() => setShowSpins(!showSpins)}
         >
-          {spins.map((spin) => (
-            <button
-              key={spin.id}
-              onClick={() =>
-                addSimpleElement(
-                  spin.id,
-                  spin.code,
-                  spin.name,
-                  "spin",
-                  spin.baseValue
-                )
-              }
-              className="flex w-full items-center justify-between border-b border-slate-100 px-4 py-3 transition hover:bg-blue-50"
-            >
-              <div className="text-left">
-                <p className="font-medium">{spin.name}</p>
+          <div className="grid grid-cols-[68px_minmax(0,1fr)_72px_36px] gap-2 border-b border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <span>Código</span>
+            <span>Elemento</span>
+            <span className="text-right">VB</span>
+            <span className="text-center">+</span>
+          </div>
 
-                <p className="text-xs text-slate-500">
-                  {spin.code} • VB {spin.baseValue.toFixed(2)}
-                </p>
-              </div>
-
-              <Plus size={18} className="text-blue-600" />
-            </button>
-          ))}
+          <div>
+            {spins.map((spin) => (
+              <ElementRow
+                key={spin.id}
+                code={spin.code}
+                name={spin.name}
+                baseValue={spin.baseValue}
+                onAdd={() =>
+                  addSimpleElement(
+                    spin.id,
+                    spin.code,
+                    spin.name,
+                    "spin",
+                    spin.baseValue
+                  )
+                }
+              />
+            ))}
+          </div>
         </Section>
 
         <Section
@@ -234,31 +408,32 @@ export default function WorkspaceLibrary() {
           open={showSequences}
           toggle={() => setShowSequences(!showSequences)}
         >
-          {sequences.map((sequence) => (
-            <button
-              key={sequence.id}
-              onClick={() =>
-                addSimpleElement(
-                  sequence.id,
-                  sequence.code,
-                  sequence.name,
-                  "sequence",
-                  sequence.baseValue
-                )
-              }
-              className="flex w-full items-center justify-between border-b border-slate-100 px-4 py-3 transition hover:bg-blue-50"
-            >
-              <div className="text-left">
-                <p className="font-medium">{sequence.name}</p>
+          <div className="grid grid-cols-[68px_minmax(0,1fr)_72px_36px] gap-2 border-b border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+            <span>Código</span>
+            <span>Elemento</span>
+            <span className="text-right">VB</span>
+            <span className="text-center">+</span>
+          </div>
 
-                <p className="text-xs text-slate-500">
-                  {sequence.code} • VB {sequence.baseValue.toFixed(2)}
-                </p>
-              </div>
-
-              <Plus size={18} className="text-blue-600" />
-            </button>
-          ))}
+          <div>
+            {sequences.map((sequence) => (
+              <ElementRow
+                key={sequence.id}
+                code={sequence.code}
+                name={sequence.name}
+                baseValue={sequence.baseValue}
+                onAdd={() =>
+                  addSimpleElement(
+                    sequence.id,
+                    sequence.code,
+                    sequence.name,
+                    "sequence",
+                    sequence.baseValue
+                  )
+                }
+              />
+            ))}
+          </div>
         </Section>
       </div>
     </section>

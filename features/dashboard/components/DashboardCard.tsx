@@ -1,10 +1,11 @@
 import { ChevronRight } from "lucide-react";
 
 import { Card } from "@/shared/components";
-import { DashboardItem } from "../dashboardData";
+import { useTranslation } from "@/shared/i18n";
+import type { DashboardQuickAction } from "../dashboardData";
 
 interface DashboardCardProps {
-  item: DashboardItem;
+  item: DashboardQuickAction;
   onClick?: () => void;
 }
 
@@ -12,7 +13,29 @@ export default function DashboardCard({
   item,
   onClick,
 }: DashboardCardProps) {
+  const { t } = useTranslation();
   const Icon = item.icon;
+
+  const contentById = {
+    "new-program": {
+      title: t("dashboard.quickActions.newProgram.title"),
+      description: t("dashboard.quickActions.newProgram.description"),
+    },
+    "new-video-analysis": {
+      title: t("dashboard.quickActions.newVideoAnalysis.title"),
+      description: t("dashboard.quickActions.newVideoAnalysis.description"),
+    },
+    "new-athlete": {
+      title: t("dashboard.quickActions.newAthlete.title"),
+      description: t("dashboard.quickActions.newAthlete.description"),
+    },
+    "new-competition": {
+      title: t("dashboard.quickActions.newCompetition.title"),
+      description: t("dashboard.quickActions.newCompetition.description"),
+    },
+  } as const;
+
+  const content = contentById[item.id];
 
   return (
     <Card
@@ -33,11 +56,11 @@ export default function DashboardCard({
           <div>
 
             <h2 className="text-xl font-bold text-slate-900">
-              {item.title}
+              {content.title}
             </h2>
 
             <p className="mt-1 text-slate-500">
-              {item.description}
+              {content.description}
             </p>
 
           </div>

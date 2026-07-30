@@ -21,7 +21,7 @@ export default function ElementPicker() {
         />
 
         <PickerButton
-          title="Piruetas"
+          title="Piões"
         />
 
         <PickerButton

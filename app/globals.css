@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f8fafc;
+  --app-border: #e2e8f0;
+  --app-muted-text: #475569;
 }
 
 @theme inline {
@@ -12,15 +16,72 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  --background: #020617;
+  --foreground: #e2e8f0;
+  --app-surface: #0f172a;
+  --app-surface-muted: #111827;
+  --app-border: #1e293b;
+  --app-muted-text: #94a3b8;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.app-shell {
+  background: var(--background);
+  color: var(--foreground);
+  --workspace-header-min-height: 56px;
+  --workspace-statusbar-min-height: 32px;
+  --workspace-safe-top: env(safe-area-inset-top, 0px);
+  --workspace-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.workspace-shell-grid {
+  display: grid;
+  height: 100%;
+  grid-template-rows:
+    minmax(var(--workspace-header-min-height), auto)
+    minmax(0, 1fr)
+    minmax(var(--workspace-statusbar-min-height), auto);
+}
+
+.workspace-shell-header {
+  min-height: var(--workspace-header-min-height);
+  padding-top: var(--workspace-safe-top);
+  overflow: visible;
+}
+
+.workspace-shell-footer {
+  min-height: var(--workspace-statusbar-min-height);
+  padding-bottom: var(--workspace-safe-bottom);
+  overflow: visible;
+}
+
+.app-surface {
+  background: var(--app-surface);
+}
+
+.app-surface-muted {
+  background: var(--app-surface-muted);
+}
+
+.app-border {
+  border-color: var(--app-border);
+}
+
+.app-text-primary {
+  color: var(--foreground);
+}
+
+.app-text-muted {
+  color: var(--app-muted-text);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }

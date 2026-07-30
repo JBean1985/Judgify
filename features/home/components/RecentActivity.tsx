@@ -33,29 +33,29 @@ const activities = [
 export default function RecentActivity() {
   return (
     <section className="mx-auto max-w-6xl">
-      <h2 className="mb-6 text-2xl font-bold text-slate-900">
+      <h2 className="mb-3 text-lg font-semibold text-slate-900">
         Atividade Recente
       </h2>
 
-      <div className="space-y-4">
+      <div className="grid gap-2 lg:grid-cols-2">
         {activities.map((activity) => {
           const Icon = activity.icon;
 
           return (
             <div
               key={activity.title}
-              className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-                <Icon size={22} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <Icon size={18} />
               </div>
 
               <div>
-                <h3 className="font-semibold">
+                <h3 className="text-sm font-semibold text-slate-900">
                   {activity.title}
                 </h3>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-xs text-slate-500">
                   {activity.description}
                 </p>
               </div>

@@ -9,7 +9,13 @@ import {
 
 export interface SidebarItem {
   id: string;
-  title: string;
+  titleKey:
+    | "navigation.sidebar.dashboard"
+    | "navigation.sidebar.planner"
+    | "navigation.sidebar.video"
+    | "navigation.sidebar.live"
+    | "navigation.sidebar.athletes"
+    | "navigation.sidebar.settings";
   icon: typeof LayoutDashboard;
   href: string;
 }
@@ -17,37 +23,37 @@ export interface SidebarItem {
 export const sidebarItems: SidebarItem[] = [
   {
     id: "dashboard",
-    title: "Painel",
+    titleKey: "navigation.sidebar.dashboard",
     icon: LayoutDashboard,
     href: "/",
   },
   {
     id: "planner",
-    title: "Construtor de Esquemas",
+    titleKey: "navigation.sidebar.planner",
     icon: FileText,
     href: "/planner",
   },
   {
     id: "video",
-    title: "Análise de Vídeo",
+    titleKey: "navigation.sidebar.video",
     icon: Camera,
     href: "/video",
   },
   {
     id: "live",
-    title: "Análise em Direto",
+    titleKey: "navigation.sidebar.live",
     icon: Radio,
     href: "/live",
   },
   {
     id: "athletes",
-    title: "Atletas",
+    titleKey: "navigation.sidebar.athletes",
     icon: Users,
     href: "/athletes",
   },
   {
     id: "settings",
-    title: "Definições",
+    titleKey: "navigation.sidebar.settings",
     icon: Settings,
     href: "/settings",
   },

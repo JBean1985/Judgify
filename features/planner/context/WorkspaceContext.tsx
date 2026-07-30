@@ -21,6 +21,25 @@ export type ProgramElement = CanonicalProgramElement & {
   notes: string;
 };
 
+export interface ManualDeductionItem {
+  id: string;
+  label: string;
+  value: number;
+}
+
+export type PcsComponentName =
+  | "skatingSkills"
+  | "transitions"
+  | "performance"
+  | "composition";
+
+export interface ManualPCS {
+  skatingSkills: number;
+  transitions: number;
+  performance: number;
+  composition: number;
+}
+
 type AddProgramElement = {
   id: string;
   name: string;
@@ -38,12 +57,20 @@ type AddProgramElement = {
 
 interface WorkspaceContextValue {
   elements: ProgramElement[];
+  deductions: ManualDeductionItem[];
+  pcs: ManualPCS;
   addElement: (element: AddProgramElement) => void;
   updateElement: (id: string, data: Partial<ProgramElement>) => void;
   removeElement: (id: string) => void;
+  duplicateElement: (elementId: string) => void;
   moveElementUp: (id: string) => void;
   moveElementDown: (id: string) => void;
   clearProgram: () => void;
+  addDeduction: (label: string, value: number) => void;
+  removeDeduction: (id: string) => void;
+  clearDeductions: () => void;
+  updatePCS: (component: PcsComponentName, value: number) => void;
+  clearPCS: () => void;
 }
 
 const WorkspaceContext =
@@ -56,6 +83,16 @@ interface WorkspaceProviderProps {
 export function WorkspaceProvider({
   children,
 }: WorkspaceProviderProps) {
+  const ELEMENTS_STORAGE_KEY = "judgify-planner-elements";
+  const DEDUCTIONS_STORAGE_KEY = "judgify-planner-deductions";
+  const PCS_STORAGE_KEY = "judgify-planner-pcs";
+  const EMPTY_PCS: ManualPCS = {
+    skatingSkills: 0,
+    transitions: 0,
+    performance: 0,
+    composition: 0,
+  };
+
   const [elements, setElements] = useState<ProgramElement[]>(() => {
     if (
       typeof window === "undefined" ||
@@ -64,9 +101,7 @@ export function WorkspaceProvider({
       return [];
     }
 
-    const stored = window.localStorage.getItem(
-      "judgify-planner-elements"
-    );
+    const stored = window.localStorage.getItem(ELEMENTS_STORAGE_KEY);
 
     if (!stored) {
       return [];
@@ -81,16 +116,117 @@ export function WorkspaceProvider({
     }
   });
 
+  const [deductions, setDeductions] = useState<ManualDeductionItem[]>(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.localStorage === "undefined"
+    ) {
+      return [];
+    }
+
+    const stored = window.localStorage.getItem(DEDUCTIONS_STORAGE_KEY);
+
+    if (!stored) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as ManualDeductionItem[];
+
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.filter((item) => {
+        const label = String(item?.label ?? "").trim();
+        const value = Number(item?.value);
+
+        return (
+          typeof item?.id === "string" &&
+          item.id.length > 0 &&
+          label.length > 0 &&
+          Number.isFinite(value) &&
+          value > 0
+        );
+      });
+    } catch {
+      return [];
+    }
+  });
+
+  const [pcs, setPCS] = useState<ManualPCS>(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.localStorage === "undefined"
+    ) {
+      return EMPTY_PCS;
+    }
+
+    const stored = window.localStorage.getItem(PCS_STORAGE_KEY);
+
+    if (!stored) {
+      return EMPTY_PCS;
+    }
+
+    try {
+      const parsed = JSON.parse(stored) as Partial<ManualPCS>;
+
+      function sanitize(value: unknown): number {
+        const numericValue = Number(value);
+
+        if (!Number.isFinite(numericValue)) {
+          return 0;
+        }
+
+        return Math.min(10, Math.max(0, numericValue));
+      }
+
+      return {
+        skatingSkills: sanitize(parsed?.skatingSkills),
+        transitions: sanitize(parsed?.transitions),
+        performance: sanitize(parsed?.performance),
+        composition: sanitize(parsed?.composition),
+      };
+    } catch {
+      return EMPTY_PCS;
+    }
+  });
+
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.localStorage === "undefined") {
       return;
     }
 
     window.localStorage.setItem(
-      "judgify-planner-elements",
+      ELEMENTS_STORAGE_KEY,
       JSON.stringify(elements)
     );
   }, [elements]);
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.localStorage === "undefined"
+    ) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      DEDUCTIONS_STORAGE_KEY,
+      JSON.stringify(deductions)
+    );
+  }, [deductions]);
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.localStorage === "undefined"
+    ) {
+      return;
+    }
+
+    window.localStorage.setItem(PCS_STORAGE_KEY, JSON.stringify(pcs));
+  }, [pcs]);
 
   function addElement(element: AddProgramElement) {
     const code = element.code ?? element.id.split("-")[0];
@@ -126,6 +262,37 @@ export function WorkspaceProvider({
     setElements((current) =>
       current.filter((element) => element.id !== id)
     );
+  }
+
+  function duplicateElement(elementId: string) {
+    setElements((current) => {
+      const index = current.findIndex(
+        (element) => element.id === elementId
+      );
+
+      if (index === -1) {
+        return current;
+      }
+
+      const source = current[index];
+      const nextId =
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${source.code}-${Date.now()}-${Math.random()
+              .toString(36)
+              .slice(2, 8)}`;
+
+      const duplicate: ProgramElement = {
+        ...source,
+        id: nextId,
+      };
+
+      const updated = [...current];
+      updated.splice(index + 1, 0, duplicate);
+
+      return updated;
+    });
   }
 
   function moveElementUp(id: string) {
@@ -168,17 +335,84 @@ export function WorkspaceProvider({
     setElements([]);
   }
 
+  function addDeduction(label: string, value: number) {
+    const normalizedLabel = String(label).trim();
+    const normalizedValue = Number(value);
+
+    if (
+      normalizedLabel.length === 0 ||
+      !Number.isFinite(normalizedValue) ||
+      normalizedValue <= 0
+    ) {
+      return;
+    }
+
+    const id =
+      typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `deduction-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 8)}`;
+
+    setDeductions((current) => [
+      ...current,
+      {
+        id,
+        label: normalizedLabel,
+        value: normalizedValue,
+      },
+    ]);
+  }
+
+  function removeDeduction(id: string) {
+    setDeductions((current) =>
+      current.filter((item) => item.id !== id)
+    );
+  }
+
+  function clearDeductions() {
+    setDeductions([]);
+  }
+
+  function updatePCS(component: PcsComponentName, value: number) {
+    const numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) {
+      return;
+    }
+
+    const clampedValue = Math.min(10, Math.max(0, numericValue));
+
+    setPCS((current) => ({
+      ...current,
+      [component]: clampedValue,
+    }));
+  }
+
+  function clearPCS() {
+    setPCS(EMPTY_PCS);
+  }
+
   const value = useMemo(
     () => ({
       elements,
+      deductions,
+      pcs,
       addElement,
       updateElement,
       removeElement,
+      duplicateElement,
       moveElementUp,
       moveElementDown,
       clearProgram,
+      addDeduction,
+      removeDeduction,
+      clearDeductions,
+      updatePCS,
+      clearPCS,
     }),
-    [elements]
+    [elements, deductions, pcs]
   );
 
   return (

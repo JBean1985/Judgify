@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslation } from "@/shared/i18n";
 
 import { SidebarItem as Item } from "./sidebarItems";
 
@@ -7,6 +10,7 @@ interface Props {
 }
 
 export default function SidebarItem({ item }: Props) {
+  const { t } = useTranslation();
   const Icon = item.icon;
 
   return (
@@ -28,7 +32,7 @@ export default function SidebarItem({ item }: Props) {
       <Icon size={22} />
 
       <span className="font-medium">
-        {item.title}
+        {t(item.titleKey)}
       </span>
     </Link>
   );

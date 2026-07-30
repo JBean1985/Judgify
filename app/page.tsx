@@ -1,5 +1,5 @@
-import WelcomeExperience from "@/features/home/pages/WelcomeExperience";
+import { DashboardPage } from "@/features/dashboard";
 
 export default function HomePage() {
-  return <WelcomeExperience />;
+  return <DashboardPage />;
 }

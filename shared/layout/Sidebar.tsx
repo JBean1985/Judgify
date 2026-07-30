@@ -1,11 +1,16 @@
+"use client";
+
 import { Trophy } from "lucide-react";
+import { useTranslation } from "@/shared/i18n";
 
 import SidebarItem from "./SidebarItem";
 import { sidebarItems } from "./sidebarItems";
 
 export default function Sidebar() {
+  const { t } = useTranslation();
+
   return (
-    <aside className="flex h-screen w-72 flex-col border-r border-slate-200 bg-white">
+    <aside className="flex h-full w-72 flex-col border-r border-slate-200 bg-white">
 
       <div className="border-b border-slate-200 p-6">
 
@@ -22,7 +27,7 @@ export default function Sidebar() {
             </h1>
 
             <p className="text-sm text-slate-500">
-              Assistente Inteligente
+              {t("navigation.brandSubtitle")}
             </p>
 
           </div>
@@ -31,7 +36,7 @@ export default function Sidebar() {
 
       </div>
 
-      <nav className="flex-1 space-y-2 p-4">
+      <nav className="flex-1 space-y-2 overflow-auto p-4">
 
         {sidebarItems.map((item) => (
           <SidebarItem
@@ -43,7 +48,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="border-t border-slate-200 p-4 text-xs text-slate-400">
-        Alpha 0.1
+        {t("common.status.alpha")}
       </div>
 
     </aside>

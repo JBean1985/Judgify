@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { ArrowLeft, Circle } from "lucide-react";
+import { useTranslation } from "@/shared/i18n";
 
 interface WorkspaceHeaderProps {
   title: string;
@@ -13,6 +14,8 @@ export default function WorkspaceHeader({
   title,
   saved = false,
 }: WorkspaceHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <header className="mb-8 border-b border-slate-200 pb-5">
       <div className="flex items-center justify-between">
@@ -23,7 +26,7 @@ export default function WorkspaceHeader({
         >
           <ArrowLeft size={18} />
 
-          <span>Início</span>
+          <span>{t("planner.header.home")}</span>
         </Link>
 
         <h1 className="text-2xl font-semibold text-slate-900">
@@ -41,7 +44,7 @@ export default function WorkspaceHeader({
           />
 
           <span className="text-slate-500">
-            {saved ? "Guardado" : "Não guardado"}
+            {saved ? t("planner.header.saved") : t("planner.header.unsaved")}
           </span>
         </div>
 

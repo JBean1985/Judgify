@@ -25,6 +25,22 @@ interface TechnicalElementCardProps {
 
 const goeOptions = [-3, -2, -1, 0, 1, 2, 3];
 
+function getCategoryLabel(category: ProgramElement["category"]): string {
+  if (category === "jump") {
+    return "Salto";
+  }
+
+  if (category === "spin") {
+    return "Pião";
+  }
+
+  if (category === "sequence") {
+    return "Sequência";
+  }
+
+  return category;
+}
+
 export default function TechnicalElementCard({
   element,
   index,
@@ -84,7 +100,7 @@ export default function TechnicalElementCard({
               </span>
 
               <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
-                {element.category === "jump" ? "Salto" : element.category}
+                {getCategoryLabel(element.category)}
               </span>
             </div>
 
@@ -233,6 +249,12 @@ export default function TechnicalElementCard({
 
           <textarea
             rows={4}
+            value={element.notes ?? ""}
+            onChange={(e) =>
+              updateElement(element.id, {
+                notes: e.target.value,
+              })
+            }
             placeholder="Adicionar observações..."
             className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none transition focus:border-blue-500"
           />

@@ -1,4 +1,8 @@
 import { GlobalContext } from "./types";
+import {
+  ActiveModule,
+  SessionManager,
+} from "../session";
 
 const STORAGE_KEY = "judgify-global-context";
 
@@ -37,10 +41,51 @@ function removeStoredContext(): void {
   window.localStorage.removeItem(STORAGE_KEY);
 }
 
+function isActiveModule(value: unknown): value is ActiveModule {
+  return (
+    value === "planner" ||
+    value === "video" ||
+    value === "live" ||
+    value === "competition" ||
+    value === "assistant"
+  );
+}
+
+function isEmptyContext(context: GlobalContext): boolean {
+  return Object.keys(context).length === 0;
+}
+
+function mapSessionToContext(): GlobalContext {
+  const session = SessionManager.getInstance().getSession();
+
+  if (!session) {
+    return {};
+  }
+
+  return {
+    athlete: session.schema?.athlete,
+    category: session.schema?.category,
+    discipline: session.schema?.discipline,
+    programType: session.schema?.programType,
+    ruleProfile: session.schema?.ruleProfile,
+    currentModule: session.activeModule,
+  };
+}
+
 export class ContextEngine {
   private static context: GlobalContext = {};
 
   static get(): GlobalContext {
+    if (isEmptyContext(this.context)) {
+      const sessionContext = mapSessionToContext();
+
+      if (!isEmptyContext(sessionContext)) {
+        this.context = sessionContext;
+      } else {
+        this.context = readStoredContext();
+      }
+    }
+
     return this.context;
   }
 
@@ -50,11 +95,34 @@ export class ContextEngine {
       ...data,
     };
 
+    const manager = SessionManager.getInstance();
+    let session = manager.getSession();
+    const nextModule = isActiveModule(this.context.currentModule)
+      ? this.context.currentModule
+      : undefined;
+
+    if (!session) {
+      session = manager.createSession(nextModule ?? "planner");
+    }
+
+    manager.updateSession({
+      schema: {
+        ...(session.schema ?? {}),
+        athlete: this.context.athlete,
+        category: this.context.category,
+        discipline: this.context.discipline,
+        programType: this.context.programType,
+        ruleProfile: this.context.ruleProfile,
+      },
+      ...(nextModule ? { activeModule: nextModule } : {}),
+    });
+
     writeStoredContext(this.context);
   }
 
   static clear(): void {
     this.context = {};
+    SessionManager.getInstance().clearSession();
     removeStoredContext();
   }
 

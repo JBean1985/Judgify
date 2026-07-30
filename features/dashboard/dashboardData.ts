@@ -1,57 +1,89 @@
 import {
+  Bell,
   Camera,
   FileText,
-  Settings,
+  Plus,
   Trophy,
   Users,
 } from "lucide-react";
 
-export interface DashboardItem {
-  id: string;
-  title: string;
-  description: string;
+export interface ContinueProject {
+  id: "planner" | "video" | "athletes";
+  module: "planner" | "video" | "athletes" | "live";
+}
+
+export interface DashboardQuickAction {
+  id:
+    | "new-program"
+    | "new-video-analysis"
+    | "new-athlete"
+    | "new-competition";
   icon: typeof FileText;
   route: string;
 }
 
-export const dashboardItems: DashboardItem[] = [
+export interface ActivityItem {
+  id: "activity-1" | "activity-2" | "activity-3" | "activity-4";
+  icon: typeof FileText;
+}
+
+export const dashboardUser = {
+  name: "Sofia",
+};
+
+export const continueProjects: ContinueProject[] = [
   {
     id: "planner",
-    title: "Construtor de Esquemas",
-    description: "Crie e otimize esquemas para maximizar a pontuação.",
+    module: "planner",
+  },
+  {
+    id: "video",
+    module: "video",
+  },
+  {
+    id: "athletes",
+    module: "athletes",
+  },
+];
+
+export const quickActions: DashboardQuickAction[] = [
+  {
+    id: "new-program",
     icon: FileText,
     route: "/planner",
   },
-
   {
-    id: "video",
-    title: "Análise de Vídeo",
-    description: "Analise treinos e competições com apoio da IA.",
+    id: "new-video-analysis",
     icon: Camera,
     route: "/video",
   },
-
   {
-    id: "live",
-    title: "Análise em Direto",
-    description: "Acompanhe e pontue o esquema em tempo real.",
-    icon: Trophy,
-    route: "/live",
-  },
-
-  {
-    id: "athletes",
-    title: "Atletas",
-    description: "Gerir atletas, treinos e histórico.",
+    id: "new-athlete",
     icon: Users,
     route: "/athletes",
   },
-
   {
-    id: "settings",
-    title: "Definições",
-    description: "Personalizar a aplicação.",
-    icon: Settings,
-    route: "/settings",
+    id: "new-competition",
+    icon: Trophy,
+    route: "/live",
+  },
+];
+
+export const recentActivities: ActivityItem[] = [
+  {
+    id: "activity-1",
+    icon: FileText,
+  },
+  {
+    id: "activity-2",
+    icon: Camera,
+  },
+  {
+    id: "activity-3",
+    icon: Bell,
+  },
+  {
+    id: "activity-4",
+    icon: Plus,
   },
 ];
