@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { ContextEngine } from "@/features/core/context";
+import {
+  ContextEngine,
+  type GlobalContext,
+} from "@/features/core/context";
 import { WorkspaceProvider } from "../../context";
 
 import WorkspaceHeader from "./WorkspaceHeader";
@@ -16,8 +19,28 @@ import FloatingActionButton from "./mobile/FloatingActionButton";
 
 export default function PlannerWorkspace() {
   const [showLibrary, setShowLibrary] = useState(false);
+  const [context, setContext] = useState<GlobalContext | null>(null);
+  const [isContextRestored, setIsContextRestored] = useState(false);
 
-  const context = ContextEngine.get();
+  useEffect(() => {
+    const restoredContext = ContextEngine.restore();
+    let isMounted = true;
+
+    queueMicrotask(() => {
+      if (!isMounted) return;
+
+      setContext(restoredContext ?? ContextEngine.get());
+      setIsContextRestored(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!isContextRestored || !context) {
+    return null;
+  }
 
   const hasSchemaContext =
     context.athlete &&
