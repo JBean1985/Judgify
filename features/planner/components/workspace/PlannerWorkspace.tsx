@@ -172,17 +172,18 @@ function VideoPlannerTransferConsumer() {
 export default function PlannerWorkspace() {
   const { t } = useTranslation();
   const [showLibrary, setShowLibrary] = useState(false);
-  const [context, setContext] = useState<GlobalContext>({});
+  const [context, setContext] = useState<GlobalContext | null>(null);
 
   const hasSchemaContext =
+    context !== null &&
     context.athlete &&
     context.category &&
     context.discipline;
 
   const activeFederation =
-    context.ruleProfile?.federation ?? "legacy";
+    context?.ruleProfile?.federation ?? "legacy";
   const activeSeason =
-    context.ruleProfile?.season ?? "legacy";
+    context?.ruleProfile?.season ?? "legacy";
 
   const activeRuleProfileLabel =
     activeFederation === "legacy" || activeSeason === "legacy"
@@ -198,6 +199,27 @@ export default function PlannerWorkspace() {
   useEffect(() => {
     setContext(ContextEngine.get());
   }, []);
+
+  if (context === null) {
+    return (
+      <WorkspaceShell
+        header={<ShellHeader title={t("planner.shellTitle")} />}
+        sidebar={<WorkspaceSidebar items={[]} collapsed />}
+        sidebarWidth={0}
+        className="h-auto min-h-screen overflow-visible [&>div]:h-auto [&>div]:min-h-screen [&>div>header]:border-b-0 [&>div>footer]:border-t-0 [&>div>div>aside]:border-r-0"
+      >
+        <div className="min-h-screen max-w-full overflow-x-hidden">
+          <div className="flex min-w-0 flex-col gap-3 px-4 py-4">
+            <WorkspaceHeader title={t("planner.workspaceTitle")} />
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500 shadow-sm">
+              A restaurar o contexto do esquema...
+            </div>
+          </div>
+        </div>
+      </WorkspaceShell>
+    );
+  }
 
   if (!hasSchemaContext) {
     return (

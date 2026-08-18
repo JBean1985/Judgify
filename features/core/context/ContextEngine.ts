@@ -55,6 +55,14 @@ function isEmptyContext(context: GlobalContext): boolean {
   return Object.keys(context).length === 0;
 }
 
+function hasSchemaContext(context: GlobalContext): boolean {
+  return Boolean(
+    context.athlete?.trim() &&
+      context.category?.trim() &&
+      context.discipline?.trim()
+  );
+}
+
 function mapSessionToContext(): GlobalContext {
   const session = SessionManager.getInstance().getSession();
 
@@ -76,13 +84,26 @@ export class ContextEngine {
   private static context: GlobalContext = {};
 
   static get(): GlobalContext {
-    if (isEmptyContext(this.context)) {
+    if (!hasSchemaContext(this.context)) {
       const sessionContext = mapSessionToContext();
 
-      if (!isEmptyContext(sessionContext)) {
+      if (hasSchemaContext(sessionContext)) {
         this.context = sessionContext;
       } else {
-        this.context = readStoredContext();
+        const storedContext = readStoredContext();
+
+        if (hasSchemaContext(storedContext)) {
+          this.context = {
+            ...storedContext,
+            ...(isActiveModule(sessionContext.currentModule)
+              ? { currentModule: sessionContext.currentModule }
+              : {}),
+          };
+        } else if (!isEmptyContext(sessionContext)) {
+          this.context = sessionContext;
+        } else {
+          this.context = storedContext;
+        }
       }
     }
 

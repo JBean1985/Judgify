@@ -9,10 +9,12 @@ import type { DashboardQuickAction } from "../dashboardData";
 
 interface QuickActionsWidgetProps {
   actions: DashboardQuickAction[];
+  onNewProgram: () => void;
 }
 
 export default function QuickActionsWidget({
   actions,
+  onNewProgram,
 }: QuickActionsWidgetProps) {
   const { t } = useTranslation();
 
@@ -56,13 +58,8 @@ export default function QuickActionsWidget({
             {actions.map((action) => {
               const Icon = action.icon;
               const content = quickActionContentById[action.id];
-
-              return (
-                <Link
-                  key={action.id}
-                  href={action.route}
-                  className="group rounded-xl border border-slate-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-blue-500"
-                >
+              const cardContent = (
+                <>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                     <Icon size={16} />
                   </div>
@@ -74,6 +71,32 @@ export default function QuickActionsWidget({
                   <p className="mt-1 text-xs text-slate-500">
                     {content.description}
                   </p>
+                </>
+              );
+
+              const className =
+                "group rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:border-blue-500";
+
+              if (action.id === "new-program") {
+                return (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={onNewProgram}
+                    className={className}
+                  >
+                    {cardContent}
+                  </button>
+                );
+              }
+
+              return (
+                <Link
+                  key={action.id}
+                  href={action.route}
+                  className={className}
+                >
+                  {cardContent}
                 </Link>
               );
             })}
